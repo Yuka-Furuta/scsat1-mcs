@@ -1,0 +1,134 @@
+<?xml version="1.0" ?>
+<!--
+This file was automatically generated with Yamcs PyMDB.
+See https://github.com/yamcs/pymdb
+-->
+<SpaceSystem xmlns="http://www.omg.org/spec/XTCE/20180204" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.omg.org/spec/XTCE/20180204 https://www.omg.org/spec/XTCE/20180204/SpaceSystem.xsd" name="SCSAT1">
+  <TelemetryMetaData>
+    <ParameterTypeSet>
+      <IntegerParameterType name="csp-crc" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="1" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-dst-id" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-dst-port" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="6" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-hmac" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="1" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-priority" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="2" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-rdp" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="1" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-reserved" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="4" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-source-id" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-source-port" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="6" encoding="unsigned"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="csp-xtea" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="1" encoding="unsigned"/>
+      </IntegerParameterType>
+    </ParameterTypeSet>
+    <ParameterSet>
+      <Parameter name="csp-crc" parameterTypeRef="csp-crc">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-dst-id" parameterTypeRef="csp-dst-id">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-dst-port" parameterTypeRef="csp-dst-port">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-hmac" parameterTypeRef="csp-hmac">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-priority" parameterTypeRef="csp-priority">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-rdp" parameterTypeRef="csp-rdp">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-reserved" parameterTypeRef="csp-reserved">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-source-id" parameterTypeRef="csp-source-id">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-source-port" parameterTypeRef="csp-source-port">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="csp-xtea" parameterTypeRef="csp-xtea">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+    </ParameterSet>
+    <ContainerSet>
+      <SequenceContainer name="csp-header" abstract="false">
+        <EntryList>
+          <ParameterRefEntry parameterRef="csp-priority">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-source-id">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-dst-id">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-dst-port">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-source-port">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-reserved">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-hmac">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-xtea">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-rdp">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="csp-crc">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+        </EntryList>
+        <BaseContainer containerRef="scsat1"/>
+      </SequenceContainer>
+      <SequenceContainer name="scsat1" abstract="true">
+        <EntryList/>
+      </SequenceContainer>
+    </ContainerSet>
+  </TelemetryMetaData>
+  <CommandMetaData/>
+</SpaceSystem>
