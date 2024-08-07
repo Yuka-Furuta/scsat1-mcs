@@ -83,11 +83,13 @@ def main():
     with open(yaml_file, 'r') as file:
         data = yaml.load(file)
 
-    #SRS3のoriginal header
+    # SRS3のoriginal header
     header_container = create_header(system,data["headers"])
-    # set 
+    
+    # telrmetryの設定
     set_telemetry(system,data["containers"],header_container)
 
+    # ファイル出力
     with open("mdb/scsat1_srs3.xml", "wt") as f:
         system.dump(f)
 

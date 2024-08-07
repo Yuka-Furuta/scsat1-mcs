@@ -1,0 +1,343 @@
+headers:
+  - name: "esp_container"
+    base: "../csp-header"
+    parameters:
+      - name: "command_id"
+        type: uint8_t
+    conditions:
+      - name: "/SCSAT1/csp-source-id"
+        num: 4
+
+containers:
+  - name: GENENAL_HK_TLM
+    endian: little
+    conditions:
+      - name: "/SCSAT1/csp-source-port"
+        num: 7
+      - name: "EPS/command_id"
+        num: 0
+    parameters:
+      - name: "status"
+        type: int8_t
+      - name: "timestamp"
+        type: "double_t"
+      - name: "uptime"
+        type: uint32_t
+      - name: "bootcount"
+        type: uint32_t
+      - name: "wdt_left"
+        type: uint32_t
+      - name: "wdt_count"
+        type: uint32_t
+      - name: "mppt_vol1"
+        type: uint16_t
+      - name: "mppt_vol2"
+        type: uint16_t
+      - name: "mppt_vol3"
+        type: uint16_t
+      - name: "mppt_vol4"
+        type: uint16_t
+      - name: "current_solar_panel1"
+        type: uint16_t
+      - name: "current_solar_panel2"
+        type: uint16_t
+      - name: "current_solar_panel3"
+        type: uint16_t
+      - name: "current_solar_panel4"
+        type: uint16_t
+      - name: "current_solar_panel5"
+        type: uint16_t
+      - name: "current_solar_panel6"
+        type: uint16_t
+      - name: "current_solar_panel7"
+        type: uint16_t
+      - name: "current_solar_panel8"
+        type: uint16_t
+      - name: "battery_voltage"
+        type: uint16_t
+      - name: "current_solar"
+        type: uint16_t
+      - name: "current_batt_in"
+        type: uint16_t
+      - name: "current_batt_out"
+        type: uint16_t
+      - name: "current_output1"
+        type: uint16_t
+      - name: "current_output2"
+        type: uint16_t
+      - name: "current_output3"
+        type: uint16_t
+      - name: "current_output4"
+        type: uint16_t
+      - name: "current_output5"
+        type: uint16_t
+      - name: "current_output6"
+        type: uint16_t
+      - name: "current_output7"
+        type: uint16_t
+      - name: "current_output8"
+        type: uint16_t
+      - name: "current_output9"
+        type: uint16_t
+      - name: "current_output10"
+        type: uint16_t
+      - name: "current_output11"
+        type: uint16_t
+      - name: "current_output12"
+        type: uint16_t
+      - name: "current_output13"
+        type: uint16_t
+      - name: "current_output14"
+        type: uint16_t
+      - name: "current_output15"
+        type: uint16_t
+      - name: "current_output16"
+        type: uint16_t
+      - name: "current_output17"
+        type: uint16_t
+      - name: "current_output18"
+        type: uint16_t
+      - name: "ao_current_output1"
+        type: uint16_t
+      - name: "ao_current_output2"
+        type: uint16_t
+      - name: "converter_vol1"
+        type: uint16_t
+      - name: "converter_vol2"
+        type: uint16_t
+      - name: "converter_vol3"
+        type: uint16_t
+      - name: "converter_vol4"
+        type: uint16_t
+      - name: "converter_vol5"
+        type: uint16_t
+      - name: "converter_vol6"
+        type: uint16_t
+      - name: "converter_vol7"
+        type: uint16_t
+      - name: "converter_vol8"
+        type: uint16_t
+      - name: "converter_state"
+        type: uint8_t
+      - name: "output_status1"
+        type: uint1_t
+      - name: "output_status2"
+        type: uint1_t
+      - name: "output_status3"
+        type: uint1_t
+      - name: "output_status4"
+        type: uint1_t
+      - name: "output_status5"
+        type: uint1_t
+      - name: "output_status6"
+        type: uint1_t
+      - name: "output_status7"
+        type: uint1_t
+      - name: "output_status8"
+        type: uint1_t
+      - name: "output_status9"
+        type: uint1_t
+      - name: "output_status10"
+        type: uint1_t
+      - name: "output_status11"
+        type: uint1_t
+      - name: "output_status12"
+        type: uint1_t
+      - name: "output_status13"
+        type: uint1_t
+      - name: "output_status14"
+        type: uint1_t
+      - name: "output_status15"
+        type: uint1_t
+      - name: "output_status16"
+        type: uint1_t
+      - name: "output_status17"
+        type: uint1_t
+      - name: "output_status18"
+        type: uint1_t
+      - name: "output_fault_status1"
+        type: uint1_t
+      - name: "output_fault_status2"
+        type: uint1_t
+      - name: "output_fault_status3"
+        type: uint1_t
+      - name: "output_fault_status4"
+        type: uint1_t
+      - name: "output_fault_status5"
+        type: uint1_t
+      - name: "output_fault_status6"
+        type: uint1_t
+      - name: "output_fault_status7"
+        type: uint1_t
+      - name: "output_fault_status8"
+        type: uint1_t
+      - name: "output_fault_status9"
+        type: uint1_t
+      - name: "output_fault_status10"
+        type: uint1_t
+      - name: "output_fault_status11"
+        type: uint1_t
+      - name: "output_fault_status12"
+        type: uint1_t
+      - name: "output_fault_status13"
+        type: uint1_t
+      - name: "output_fault_status14"
+        type: uint1_t
+      - name: "output_fault_status15"
+        type: uint1_t
+      - name: "output_fault_status16"
+        type: uint1_t
+      - name: "output_fault_status17"
+        type: uint1_t
+      - name: "output_fault_status18"
+        type: uint1_t
+      - name: "protected_access_count"
+        type: uint16_t
+      - name: "output_on_delta1"
+        type: uint16_t
+      - name: "output_on_delta2"
+        type: uint16_t
+      - name: "output_on_delta3"
+        type: uint16_t
+      - name: "output_on_delta4"
+        type: uint16_t
+      - name: "output_on_delta5"
+        type: uint16_t
+      - name: "output_on_delta6"
+        type: uint16_t
+      - name: "output_on_delta7"
+        type: uint16_t
+      - name: "output_on_delta8"
+        type: uint16_t
+      - name: "output_on_delta9"
+        type: uint16_t
+      - name: "output_on_delta10"
+        type: uint16_t
+      - name: "output_on_delta11"
+        type: uint16_t
+      - name: "output_on_delta12"
+        type: uint16_t
+      - name: "output_on_delta13"
+        type: uint16_t
+      - name: "output_on_delta14"
+        type: uint16_t
+      - name: "output_on_delta15"
+        type: uint16_t
+      - name: "output_on_delta16"
+        type: uint16_t
+      - name: "output_on_delta17"
+        type: uint16_t
+      - name: "output_on_delta18"
+        type: uint16_t
+      - name: "output_off_delta1"
+        type: uint16_t
+      - name: "output_off_delta2"
+        type: uint16_t
+      - name: "output_off_delta3"
+        type: uint16_t
+      - name: "output_off_delta4"
+        type: uint16_t
+      - name: "output_off_delta5"
+        type: uint16_t
+      - name: "output_off_delta6"
+        type: uint16_t
+      - name: "output_off_delta7"
+        type: uint16_t
+      - name: "output_off_delta8"
+        type: uint16_t
+      - name: "output_off_delta9"
+        type: uint16_t
+      - name: "output_off_delta10"
+        type: uint16_t
+      - name: "output_off_delta11"
+        type: uint16_t
+      - name: "output_off_delta12"
+        type: uint16_t
+      - name: "output_off_delta13"
+        type: uint16_t
+      - name: "output_off_delta14"
+        type: uint16_t
+      - name: "output_off_delta15"
+        type: uint16_t
+      - name: "output_off_delta16"
+        type: uint16_t
+      - name: "output_off_delta17"
+        type: uint16_t
+      - name: "output_off_delta18"
+        type: uint16_t
+      - name: "output_fault_count1"
+        type: uint8_t
+      - name: "output_fault_count2"
+        type: uint8_t
+      - name: "output_fault_count3"
+        type: uint8_t
+      - name: "output_fault_count4"
+        type: uint8_t
+      - name: "output_fault_count5"
+        type: uint8_t
+      - name: "output_fault_count6"
+        type: uint8_t
+      - name: "output_fault_count7"
+        type: uint8_t
+      - name: "output_fault_count8"
+        type: uint8_t
+      - name: "output_fault_count9"
+        type: uint8_t
+      - name: "output_fault_count10"
+        type: uint8_t
+      - name: "output_fault_count11"
+        type: uint8_t
+      - name: "output_fault_count12"
+        type: uint8_t
+      - name: "output_fault_count13"
+        type: uint8_t
+      - name: "output_fault_count14"
+        type: uint8_t
+      - name: "output_fault_count15"
+        type: uint8_t
+      - name: "output_fault_count16"
+        type: uint8_t
+      - name: "output_fault_count17"
+        type: uint8_t
+      - name: "output_fault_count18"
+        type: uint8_t
+      - name: "temperature1"
+        type: int8_t
+      - name: "temperature2"
+        type: int8_t
+      - name: "temperature3"
+        type: int8_t
+      - name: "temperature4"
+        type: int8_t
+      - name: "temperature5"
+        type: int8_t
+      - name: "temperature6"
+        type: int8_t
+      - name: "temperature7"
+        type: int8_t
+      - name: "temperature8"
+        type: int8_t
+      - name: "temperature9"
+        type: int8_t
+      - name: "temperature10"
+        type: int8_t
+      - name: "temperature11"
+        type: int8_t
+      - name: "temperature12"
+        type: int8_t
+      - name: "temperature13"
+        type: int8_t
+      - name: "temperature14"
+        type: int8_t
+      - name: "battery_status"
+        type: uint8_t
+      - name: "mppt_mode"
+        type: uint8_t
+      - name: "battery_heater_mode"
+        type: uint8_t
+      - name: "battery_heater_status"
+        type: uint8_t
+      - name: "ping_wdt_toggles"
+        type: uint16_t
+      - name: "ping_wdt_turn_offs"
+        type: uint8_t
