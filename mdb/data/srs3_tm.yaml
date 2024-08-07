@@ -1,143 +1,176 @@
-parameters:
+headers:
+  - name: "srs3-header"
+    base: "../csp-header"
+    parameters:
+      - name: "telemetry-id"
+        type: uint8_t
+      - name: "srs3-reserved"
+        type: uint16_t
+      - name: "srs3-id"
+        type: uint16_t 
+    conditions:
+      - name: "/SCSAT1/csp-source-id"
+        num: 21
+      - name: "/SCSAT1/csp-source-port"
+        num: 19
+   
 
-  TM_list:
-    - name: "temp_mcu"
-      type: int16_t
-    - name: "temp_power"
-      type: int16_t
-    - name: "temp_lna"
-      type: int16_t
-    - name: "temp_pa"
-      type: int16_t
-    - name: "volt_vin"
-      type: uint16_t
-    - name: "volt_vreg"
-      type: uint16_t
-    - name: "volt_3v3"
-      type: uint16_t
-    - name: "curr_vin"
-      type: int16_t
-    - name: "curr_vreg"
-      type: int16_t
-    - name: "curr_3v3"
-      type: int16_t
-    - name: "power_vin"
-      type: uint16_t
-    - name: "power_vreg"
-      type: uint16_t
-    - name: "power_3v3"
-      type: uint16_t
+containers:
+  - name: TM
+    conditions:
+      - name: "SRS3/srs3-id"
+        num: 0x7495
+    parameters:
+      - name: "temp_mcu"
+        type: int16_t
+      - name: "temp_power"
+        type: int16_t
+      - name: "temp_lna"
+        type: int16_t
+      - name: "temp_pa"
+        type: int16_t
+      - name: "volt_vin"
+        type: uint16_t
+      - name: "volt_vreg"
+        type: uint16_t
+      - name: "volt_3v3"
+        type: uint16_t
+      - name: "curr_vin"
+        type: int16_t
+      - name: "curr_vreg"
+        type: int16_t
+      - name: "curr_3v3"
+        type: int16_t
+      - name: "power_vin"
+        type: uint16_t
+      - name: "power_vreg"
+        type: uint16_t
+      - name: "power_3v3"
+        type: uint16_t
 
-  SYS_BOOT_COUNT_list:
-    - name: "boot_count"
-      type: uint32_t
+  - name: SYS_BOOT_COUNT
+    conditions:
+      - name: "SRS3/srs3-id"
+        num: 0x428c
+    parameters:
+      - name: "boot_count"
+        type: uint32_t
 
+  - name: SYS_GWDT_COUNTER
+    conditions:
+      - name: "SRS3/srs3-id"
+        num: 0x4290
+    parameters:
+      - name: "gwdt_counter"
+        type: uint32_t
 
-  SYS_GWDT_COUNTER_list:
-    - name: "gwdt_counter"
-      type: uint32_t
+  - name: TX
+    conditions:
+      - name: "SRS3/srs3-id"
+        num: 0x11e4
+    parameters:
+      - name: "tx_allow_always"
+        type: int8_t
+      - name: "tx_allow_time"
+        type: uint16_t
+      - name: "tx_freq"
+        type: uint32_t
+      - name: "tx_rate"
+        type: uint32_t
+      - name: "tx_bt"
+        type: uint8_t
+      - name: "tx_pout"
+        type: float32_t
+      - name: "tx_gain"
+        type: uint16_t
+      - name: "tx_alc_mode"
+        type: uint8_t
+      - name: "tx_alc_kp"
+        type: float32_t
+      - name: "tx_alc_limit"
+        type: uint16_t
+      - name: "tx_alc_gain"
+        type: uint16_t
+      - name: "tx_rs"
+        type: int8_t
+      - name: "tx_cc"
+        type: int8_t
+      - name: "tx_rand"
+        type: int8_t
+      - name: "tx_crc"
+        type: int8_t
+      - name: "tx_idle_frames"
+        type: uint16_t
+      - name: "tx_train_type"
+        type: uint8_t
+      - name: "tx_preamble"
+        type: uint16_t
+      - name: "tx_postamble"
+        type: uint16_t
+      - name: "tx_midamble"
+        type: uint16_t
+      - name: "tx_size"
+        type: uint16_t
+      - name: "tx_id"
+        type: uint16_t
+      - name: "tx_crypto_key"
+        type: uint34_t 
+      - name: "tx_crypto_encrypt"
+        type: uint8_t
+      - name: "tx_crypto_auth"
+        type: uint8_t
+      - name: "tx_frames"
+        type: uint32_t
+      - name: "tx_power_forward"
+        type: float32_t
+      - name: "tx_power_reflection"
+        type: float32_t
+      - name: "tx_over_power"
+        type: uint16_t
+      - name: "tx_pll_nolock"
+        type: uint16_t
 
-
-  TX_list:
-    - name: "tx_allow_always"
-      type: int8_t
-    - name: "tx_allow_time"
-      type: uint16_t
-    - name: "tx_freq"
-      type: uint32_t
-    - name: "tx_rate"
-      type: uint32_t
-    - name: "tx_bt"
-      type: uint8_t
-    - name: "tx_pout"
-      type: float32_t
-    - name: "tx_gain"
-      type: uint16_t
-    - name: "tx_alc_mode"
-      type: uint8_t
-    - name: "tx_alc_kp"
-      type: float32_t
-    - name: "tx_alc_limit"
-      type: uint16_t
-    - name: "tx_alc_gain"
-      type: uint16_t
-    - name: "tx_rs"
-      type: int8_t
-    - name: "tx_cc"
-      type: int8_t
-    - name: "tx_rand"
-      type: int8_t
-    - name: "tx_crc"
-      type: int8_t
-    - name: "tx_idle_frames"
-      type: uint16_t
-    - name: "tx_train_type"
-      type: uint8_t
-    - name: "tx_preamble"
-      type: uint16_t
-    - name: "tx_postamble"
-      type: uint16_t
-    - name: "tx_midamble"
-      type: uint16_t
-    - name: "tx_size"
-      type: uint16_t
-    - name: "tx_id"
-      type: uint16_t
-    - name: "tx_crypto_key"
-      type: uint34_t 
-    - name: "tx_crypto_encrypt"
-      type: uint8_t
-    - name: "tx_crypto_auth"
-      type: uint8_t
-    - name: "tx_frames"
-      type: uint32_t
-    - name: "tx_power_forward"
-      type: float32_t
-    - name: "tx_power_reflection"
-      type: float32_t
-    - name: "tx_over_power"
-      type: uint16_t
-    - name: "tx_pll_nolock"
-      type: uint16_t
-
-
-  RX_list:
-    - name: "rx_freq"
-      type: uint32_t
-    - name: "rx_rate"
-      type: uint32_t
-    - name: "rx_bw"
-      type: uint8_t
-    - name: "rx_rs"
-      type: uint8_t
-    - name: "rx_cc"
-      type: uint8_t
-    - name: "rx_rand"
-      type: uint8_t
-    - name: "rx_crc"
-      type: uint8_t
-    - name: "rx_size"
-      type: uint16_t
-    - name: "rx_id"
-      type: uint16_t
-    - name: "rx_crypto_key"
-      type: uint34_t 
-    - name: "rx_crypto_decrypt"
-      type: uint8_t
-    - name: "rx_crypto_auth"
-      type: uint8_t
-    - name: "rx_local_drop"
-      type: uint8_t
-    - name: "rx_frames"
-      type: uint32_t
-    - name: "rx_detected"
-      type: uint32_t
-    - name: "rx_rssi"
-      type: float32_t
-    - name: "rx_freqerr"
-      type: float32_t
-    - name: "rx_pll_nolock"
-      type: uint16_t
+  - name: RX
+    conditions:
+      - name: "SRS3/srs3-id"
+        num: 0x4203
+    parameters:
+      - name: "rx_freq"
+        type: uint32_t
+      - name: "rx_rate"
+        type: uint32_t
+      - name: "rx_bw"
+        type: uint8_t
+      - name: "rx_rs"
+        type: uint8_t
+      - name: "rx_cc"
+        type: uint8_t
+      - name: "rx_rand"
+        type: uint8_t
+      - name: "rx_crc"
+        type: uint8_t
+      - name: "rx_size"
+        type: uint16_t
+      - name: "rx_id"
+        type: uint16_t
+      - name: "rx_crypto_key"
+        type: uint34_t 
+      - name: "rx_crypto_decrypt"
+        type: uint8_t
+      - name: "rx_crypto_auth"
+        type: uint8_t
+      - name: "rx_local_drop"
+        type: uint8_t
+      - name: "rx_frames"
+        type: uint32_t
+      - name: "rx_detected"
+        type: uint32_t
+      - name: "rx_rssi"
+        type: float32_t
+      - name: "rx_freqerr"
+        type: float32_t
+      - name: "rx_pll_nolock"
+        type: uint16_t
 
 
 

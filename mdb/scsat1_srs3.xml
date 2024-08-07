@@ -18,9 +18,6 @@ See https://github.com/yamcs/pymdb
       <IntegerParameterType name="curr_vreg" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="gwdt_counter" signed="false" sizeInBits="32">
-        <IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
-      </IntegerParameterType>
       <IntegerParameterType name="power_3v3" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
@@ -216,9 +213,6 @@ See https://github.com/yamcs/pymdb
         <ParameterProperties dataSource="telemetered" persistence="true"/>
       </Parameter>
       <Parameter name="curr_vreg" parameterTypeRef="curr_vreg">
-        <ParameterProperties dataSource="telemetered" persistence="true"/>
-      </Parameter>
-      <Parameter name="gwdt_counter" parameterTypeRef="gwdt_counter">
         <ParameterProperties dataSource="telemetered" persistence="true"/>
       </Parameter>
       <Parameter name="power_3v3" parameterTypeRef="power_3v3">
@@ -532,13 +526,7 @@ See https://github.com/yamcs/pymdb
         </BaseContainer>
       </SequenceContainer>
       <SequenceContainer name="SYS_GWDT_COUNTER" abstract="false">
-        <EntryList>
-          <ParameterRefEntry parameterRef="gwdt_counter">
-            <LocationInContainerInBits referenceLocation="previousEntry">
-              <FixedValue>0</FixedValue>
-            </LocationInContainerInBits>
-          </ParameterRefEntry>
-        </EntryList>
+        <EntryList/>
         <BaseContainer containerRef="srs3-header">
           <RestrictionCriteria>
             <BooleanExpression>

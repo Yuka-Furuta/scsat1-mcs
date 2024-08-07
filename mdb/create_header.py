@@ -11,6 +11,22 @@ class Subsystem(Enum):
     YAMCS = 12
     SRS3 = 21
 
+def set_entries_list(system, cont):
+    try:
+        param_data = cont["parameters"]
+        entries_list = []
+        for param in param_data:
+            tm = IntegerParameter(
+                system=system,
+                name=param["name"],
+                signed=False,
+                encoding=globals()[param["type"]],
+            )
+            entries_list.append(ParameterEntry(tm))
+        return entries_list
+    except:
+        return None
+
 
 def main():
     yaml = YAML()
@@ -20,7 +36,6 @@ def main():
         data = yaml.load(file)
 
     system = System("SCSAT1")
-    csp_header_name="csp-header"
 
 
     general_container = Container(
@@ -30,25 +45,13 @@ def main():
     )
 
 
-    entries_list=[]
-
-    for key in data["parameters"].keys():
-        for param in data["parameters"][key]:
-            tm = IntegerParameter(
+    for cont in data["containers"]:
+        container = Container(
                 system=system,
-                name=param["name"],
-                signed=False,
-                encoding=globals()[param["type"]]
+                name=cont["name"],
+                base=general_container ,
+                entries=set_entries_list(system, cont),
             )
-            entries_list.append(ParameterEntry(tm))
-
-
-    container = Container(
-            system=system,
-            name=csp_header_name,
-            base=general_container ,
-            entries=entries_list
-        )
 
     with open("mdb/scsat1_header.xml", "wt") as f:
         system.dump(f)
