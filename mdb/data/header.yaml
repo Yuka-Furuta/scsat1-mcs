@@ -1,0 +1,22 @@
+parameters:
+  headers:
+    - name: "csp-priority"
+      type: uint2_t
+    - name: "csp-source-id"
+      type: uint5_t
+    - name: "csp-dst-id"
+      type: uint5_t
+    - name: "csp-dst-port"
+      type: uint6_t
+    - name: "csp-source-port"
+      type: uint6_t
+    - name: "csp-reserved"
+      type: uint4_t
+    - name: "csp-hmac"
+      type: uint1_t
+    - name: "csp-xtea"
+      type: uint1_t
+    - name: "csp-rdp"
+      type: uint1_t
+    - name: "csp-crc"
+      type: uint1_t
