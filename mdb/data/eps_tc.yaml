@@ -1,0 +1,9 @@
+default_commands:
+  - name: eps_command
+    commands:
+      - name: "GWDT_RESET"
+        command_id: 0
+        magic_num: 30868
+      - name: "HW_RESET"
+        command_id: 1
+        magic_num: 17767
