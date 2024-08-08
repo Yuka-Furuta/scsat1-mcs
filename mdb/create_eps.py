@@ -13,47 +13,28 @@ class Subsystem(Enum):
     YAMCS = 12
     SRS3 = 21
 
-def en_set_le(type_name):
-    if type_name == "char":
-        si = False
-        en = StringEncoding()
-    elif type_name =="bool":
-        si = False
-        en = float64le_t
-    elif type_name =="double_t":
-        si = False
-        en = float64le_t
-    elif type_name == "float64_t":
-        si = False
-        en = float32le_t
-    elif type_name == int8_t:
-        si = True
-        en = IntegerEncoding(
-                bits=8,
-                little_endian=True,
-                scheme=IntegerEncodingScheme.TWOS_COMPLEMENT,
-            )
-    elif type_name == uint8_t:
-        si = False
-        en = IntegerEncoding(
-                bits=8,
-                little_endian=True,
-                scheme=IntegerEncodingScheme.UNSIGNED,
-            )
-    elif type_name == uint1_t:
-        si = False
-        en = uint1_t
-    elif type_name == uint16_t:
-        si = False
-        en = uint16le_t        
-    elif type_name == uint32_t:
-        si = False
-        en = uint32le_t    
+def set_encoding(param, endian):
+    param_type = param.get("type", "int")
+    if param_type == "int":
+        if param.get("signed", False) == True:
+            scheme = IntegerEncodingScheme.TWOS_COMPLEMENT
+        else:
+            scheme = IntegerEncodingScheme.UNSIGNED
+        enc = IntegerEncoding(
+            bits = param.get("bit", 16),
+            little_endian=endian,
+            scheme=scheme,
+        )
+    elif param_type == "double":
+        enc = FloatEncoding(
+            bits = param.get("bit", 64),
+            little_endian=endian,
+            scheme=FloatEncodingScheme.IEEE754_1985
+        )
     else :
-        print("Error: "+ str(type_name) + "is not defined\n")
-        sys.exit(1)
-
-    return si,en
+        print(f"encoding error: {param_type} is not defined.")
+    
+    return enc
 
 
 def create_header(system,data):
@@ -86,12 +67,23 @@ def set_entries_list(system, cont):
         param_data = cont["parameters"]
         entries_list = []
         for param in param_data:
-            tm = IntegerParameter(
-                system=system,
-                name=param["name"],
-                signed=False,
-                encoding=globals()[param["type"]],
-            )
+            if param.get("type", "int") == "int":
+                tm = IntegerParameter(
+                    system = system,
+                    name = param["name"],
+                    signed = param.get("signed", False),
+                    encoding = set_encoding(param, cont.get("endian",False)),
+                )
+            elif param.get("type", "int") == "double":
+                tm = FloatParameter(
+                    system = system,
+                    name = param["name"],
+                    bits = param.get("bit", 64),
+                    encoding = set_encoding(param, cont.get("endian",False)),
+                )
+            else:
+                print("set parameter error:"+str(param.get("name", "don't know"))+"\n")
+
             entries_list.append(ParameterEntry(tm))
         return entries_list
     except:
@@ -127,40 +119,7 @@ def main():
     # EPS Parameter
     header_container = create_header(system,data["headers"])
 
-    # set_telemetry(system,data["containers"],header_container)
-  
-
-    for param in tmd.param_list:
-        entries_list=[]
-        if len(param) == 4:
-            for l in param[3]:
-                si,en=en_set_le(l[1])
-                if l[1] == "double_t":
-                    tm = FloatParameter(
-                        system=system,
-                        name=l[0],
-                        bits=64,
-                        encoding=en,
-                    )
-                else:
-                    tm = IntegerParameter(
-                        system=system,
-                        name=l[0],
-                        signed=si,
-                        encoding=en,
-                    )
-                entries_list.append(ParameterEntry(tm))
-
-            container = Container(
-                    system=system,
-                    name=param[0],
-                    base = header_container,
-                    entries=entries_list,
-                    condition = all_of(
-                        eq("/SCSAT1/csp-source-port", param[1], calibrated=True),
-                        eq("EPS/command_id", param[2], calibrated=True),
-                    )
-                )
+    set_telemetry(system,data["containers"], header_container)
             
     with open("mdb/scsat1_eps.xml", "wt") as f:
         system.dump(f)
