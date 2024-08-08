@@ -9,14 +9,17 @@ See https://github.com/yamcs/pymdb
       <IntegerParameterType name="boot_count" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="curr_3v3" signed="false" sizeInBits="32">
+      <IntegerParameterType name="curr_3v3" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="curr_vin" signed="false" sizeInBits="32">
+      <IntegerParameterType name="curr_vin" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="curr_vreg" signed="false" sizeInBits="32">
+      <IntegerParameterType name="curr_vreg" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="gwdt_counter" signed="false" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
       <IntegerParameterType name="power_3v3" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
@@ -43,7 +46,7 @@ See https://github.com/yamcs/pymdb
         <IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </IntegerParameterType>
       <IntegerParameterType name="rx_crypto_key" signed="false" sizeInBits="32">
-        <IntegerDataEncoding sizeInBits="34" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
+        <IntegerDataEncoding sizeInBits="34" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
       <IntegerParameterType name="rx_detected" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
@@ -54,9 +57,9 @@ See https://github.com/yamcs/pymdb
       <IntegerParameterType name="rx_freq" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="rx_freqerr" signed="false" sizeInBits="32">
+      <FloatParameterType name="rx_freqerr" sizeInBits="32">
         <FloatDataEncoding sizeInBits="32" encoding="IEEE754_1985" byteOrder="mostSignificantByteFirst"/>
-      </IntegerParameterType>
+      </FloatParameterType>
       <IntegerParameterType name="rx_id" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
@@ -75,9 +78,9 @@ See https://github.com/yamcs/pymdb
       <IntegerParameterType name="rx_rs" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </IntegerParameterType>
-      <IntegerParameterType name="rx_rssi" signed="false" sizeInBits="32">
+      <FloatParameterType name="rx_rssi" sizeInBits="32">
         <FloatDataEncoding sizeInBits="32" encoding="IEEE754_1985" byteOrder="mostSignificantByteFirst"/>
-      </IntegerParameterType>
+      </FloatParameterType>
       <IntegerParameterType name="rx_size" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
@@ -90,31 +93,31 @@ See https://github.com/yamcs/pymdb
       <IntegerParameterType name="telemetry-id" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </IntegerParameterType>
-      <IntegerParameterType name="temp_lna" signed="false" sizeInBits="32">
+      <IntegerParameterType name="temp_lna" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="temp_mcu" signed="false" sizeInBits="32">
+      <IntegerParameterType name="temp_mcu" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="temp_pa" signed="false" sizeInBits="32">
+      <IntegerParameterType name="temp_pa" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="temp_power" signed="false" sizeInBits="32">
+      <IntegerParameterType name="temp_power" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_alc_gain" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="tx_alc_kp" signed="false" sizeInBits="32">
+      <FloatParameterType name="tx_alc_kp" sizeInBits="32">
         <FloatDataEncoding sizeInBits="32" encoding="IEEE754_1985" byteOrder="mostSignificantByteFirst"/>
-      </IntegerParameterType>
+      </FloatParameterType>
       <IntegerParameterType name="tx_alc_limit" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_alc_mode" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </IntegerParameterType>
-      <IntegerParameterType name="tx_allow_always" signed="false" sizeInBits="32">
+      <IntegerParameterType name="tx_allow_always" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="twosComplement"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_allow_time" signed="false" sizeInBits="32">
@@ -123,10 +126,10 @@ See https://github.com/yamcs/pymdb
       <IntegerParameterType name="tx_bt" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </IntegerParameterType>
-      <IntegerParameterType name="tx_cc" signed="false" sizeInBits="32">
+      <IntegerParameterType name="tx_cc" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="twosComplement"/>
       </IntegerParameterType>
-      <IntegerParameterType name="tx_crc" signed="false" sizeInBits="32">
+      <IntegerParameterType name="tx_crc" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="twosComplement"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_crypto_auth" signed="false" sizeInBits="32">
@@ -136,7 +139,7 @@ See https://github.com/yamcs/pymdb
         <IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_crypto_key" signed="false" sizeInBits="32">
-        <IntegerDataEncoding sizeInBits="34" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
+        <IntegerDataEncoding sizeInBits="34" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_frames" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
@@ -165,25 +168,25 @@ See https://github.com/yamcs/pymdb
       <IntegerParameterType name="tx_postamble" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="tx_pout" signed="false" sizeInBits="32">
+      <FloatParameterType name="tx_pout" sizeInBits="32">
         <FloatDataEncoding sizeInBits="32" encoding="IEEE754_1985" byteOrder="mostSignificantByteFirst"/>
-      </IntegerParameterType>
-      <IntegerParameterType name="tx_power_forward" signed="false" sizeInBits="32">
+      </FloatParameterType>
+      <FloatParameterType name="tx_power_forward" sizeInBits="32">
         <FloatDataEncoding sizeInBits="32" encoding="IEEE754_1985" byteOrder="mostSignificantByteFirst"/>
-      </IntegerParameterType>
-      <IntegerParameterType name="tx_power_reflection" signed="false" sizeInBits="32">
+      </FloatParameterType>
+      <FloatParameterType name="tx_power_reflection" sizeInBits="32">
         <FloatDataEncoding sizeInBits="32" encoding="IEEE754_1985" byteOrder="mostSignificantByteFirst"/>
-      </IntegerParameterType>
+      </FloatParameterType>
       <IntegerParameterType name="tx_preamble" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="tx_rand" signed="false" sizeInBits="32">
+      <IntegerParameterType name="tx_rand" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="twosComplement"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_rate" signed="false" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="32" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
-      <IntegerParameterType name="tx_rs" signed="false" sizeInBits="32">
+      <IntegerParameterType name="tx_rs" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="8" encoding="twosComplement"/>
       </IntegerParameterType>
       <IntegerParameterType name="tx_size" signed="false" sizeInBits="32">
@@ -213,6 +216,9 @@ See https://github.com/yamcs/pymdb
         <ParameterProperties dataSource="telemetered" persistence="true"/>
       </Parameter>
       <Parameter name="curr_vreg" parameterTypeRef="curr_vreg">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="gwdt_counter" parameterTypeRef="gwdt_counter">
         <ParameterProperties dataSource="telemetered" persistence="true"/>
       </Parameter>
       <Parameter name="power_3v3" parameterTypeRef="power_3v3">
@@ -526,7 +532,13 @@ See https://github.com/yamcs/pymdb
         </BaseContainer>
       </SequenceContainer>
       <SequenceContainer name="SYS_GWDT_COUNTER" abstract="false">
-        <EntryList/>
+        <EntryList>
+          <ParameterRefEntry parameterRef="gwdt_counter">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+        </EntryList>
         <BaseContainer containerRef="srs3-header">
           <RestrictionCriteria>
             <BooleanExpression>

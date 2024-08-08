@@ -3,7 +3,6 @@ headers:
     base: "../csp-header"
     parameters:
       - name: "command_id"
-        type: int
         bit: 8
     conditions:
       - name: "/SCSAT1/csp-source-id"
@@ -19,22 +18,17 @@ containers:
         num: 0
     parameters:
       - name: "status"
-        type: int
         bit: 8
         signed: true
       - name: "timestamp"
         type: "double"
       - name: "uptime"
-        type: int
         bit: 32
       - name: "bootcount"
-        type: int
         bit: 32
       - name: "wdt_left"
-        type: int
         bit: 32
       - name: "wdt_count"
-        type: int
         bit: 32
       - name: "mppt_vol1"
       - name: "mppt_vol2"
@@ -81,115 +75,78 @@ containers:
       - name: "converter_vol7"
       - name: "converter_vol8"
       - name: "converter_state"
-        type: int
         bit: 8
       - name: "output_status1"
-        type: int
         bit: 1
       - name: "output_status2"
-        type: int
         bit: 1
       - name: "output_status3"
-        type: int
         bit: 1
       - name: "output_status4"
-        type: int
         bit: 1
       - name: "output_status5"
-        type: int
         bit: 1
       - name: "output_status6"
-        type: int
         bit: 1
       - name: "output_status7"
-        type: int
         bit: 1
       - name: "output_status8"
-        type: int
         bit: 1
       - name: "output_status9"
-        type: int
         bit: 1
       - name: "output_status10"
-        type: int
         bit: 1
       - name: "output_status11"
-        type: int
         bit: 1
       - name: "output_status12"
-        type: int
         bit: 1
       - name: "output_status13"
-        type: int
         bit: 1
       - name: "output_status14"
-        type: int
         bit: 1
       - name: "output_status15"
-        type: int
         bit: 1
       - name: "output_status16"
-        type: int
         bit: 1
       - name: "output_status17"
-        type: int
         bit: 1
       - name: "output_status18"
-        type: int
         bit: 1
       - name: "output_fault_status1"
-        type: int
         bit: 1
       - name: "output_fault_status2"
-        type: int
         bit: 1
       - name: "output_fault_status3"
-        type: int
         bit: 1
       - name: "output_fault_status4"
-        type: int
         bit: 1
       - name: "output_fault_status5"
-        type: int
         bit: 1
       - name: "output_fault_status6"
-        type: int
         bit: 1
       - name: "output_fault_status7"
-        type: int
         bit: 1
       - name: "output_fault_status8"
-        type: int
         bit: 1
       - name: "output_fault_status9"
-        type: int
         bit: 1
       - name: "output_fault_status10"
-        type: int
         bit: 1
       - name: "output_fault_status11"
-        type: int
         bit: 1
       - name: "output_fault_status12"
-        type: int
         bit: 1
       - name: "output_fault_status13"
-        type: int
         bit: 1
       - name: "output_fault_status14"
-        type: int
         bit: 1
       - name: "output_fault_status15"
-        type: int
         bit: 1
       - name: "output_fault_status16"
-        type: int
         bit: 1
       - name: "output_fault_status17"
-        type: int
         bit: 1
       - name: "output_fault_status18"
-        type: int
         bit: 1
       - name: "protected_access_count"
       - name: "output_on_delta1"
@@ -229,128 +186,91 @@ containers:
       - name: "output_off_delta17"
       - name: "output_off_delta18"
       - name: "output_fault_count1"
-        type: int
         bit: 8
       - name: "output_fault_count2"
-        type: int
         bit: 8
       - name: "output_fault_count3"
-        type: int
         bit: 8
       - name: "output_fault_count4"
-        type: int
         bit: 8
       - name: "output_fault_count5"
-        type: int
         bit: 8
       - name: "output_fault_count6"
-        type: int
         bit: 8
       - name: "output_fault_count7"
-        type: int
         bit: 8
       - name: "output_fault_count8"
-        type: int
         bit: 8
       - name: "output_fault_count9"
-        type: int
         bit: 8
       - name: "output_fault_count10"
-        type: int
         bit: 8
       - name: "output_fault_count11"
-        type: int
         bit: 8
       - name: "output_fault_count12"
-        type: int
         bit: 8
       - name: "output_fault_count13"
-        type: int
         bit: 8
       - name: "output_fault_count14"
-        type: int
         bit: 8
       - name: "output_fault_count15"
-        type: int
         bit: 8
       - name: "output_fault_count16"
-        type: int
         bit: 8
       - name: "output_fault_count17"
-        type: int
         bit: 8
       - name: "output_fault_count18"
-        type: int
         bit: 8
       - name: "temperature1"
-        type: int
         bit: 8
         signed: true
       - name: "temperature2"
-        type: int
         bit: 8
         signed: true
       - name: "temperature3"
-        type: int
         bit: 8
         signed: true
       - name: "temperature4"
-        type: int
         bit: 8
         signed: true
       - name: "temperature5"
-        type: int
         bit: 8
         signed: true
       - name: "temperature6"
-        type: int
         bit: 8
         signed: true
       - name: "temperature7"
-        type: int
         bit: 8
         signed: true
       - name: "temperature8"
-        type: int
         bit: 8
         signed: true
       - name: "temperature9"
-        type: int
         bit: 8
         signed: true
       - name: "temperature10"
-        type: int
         bit: 8
         signed: true
       - name: "temperature11"
-        type: int
         bit: 8
         signed: true
       - name: "temperature12"
-        type: int
         bit: 8
         signed: true
       - name: "temperature13"
-        type: int
         bit: 8
         signed: true
       - name: "temperature14"
-        type: int
         bit: 8
         signed: true
       - name: "battery_status"
-        type: int
         bit: 8
       - name: "mppt_mode"
-        type: int
         bit: 8
       - name: "battery_heater_mode"
-        type: int
         bit: 8
       - name: "battery_heater_status"
-        type: int
         bit: 8
       - name: "ping_wdt_toggles"
       - name: "ping_wdt_turn_offs"
-        type: int
         bit: 8

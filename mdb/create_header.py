@@ -3,6 +3,7 @@ from enum import Enum
 from yamcs.pymdb import *
 import sys
 
+import module. create_tm as ctm
 
 class Subsystem(Enum):
     EPS = 4
@@ -10,22 +11,6 @@ class Subsystem(Enum):
     ADCS = 3
     YAMCS = 12
     SRS3 = 21
-
-def set_entries_list(system, cont):
-    try:
-        param_data = cont["parameters"]
-        entries_list = []
-        for param in param_data:
-            tm = IntegerParameter(
-                system=system,
-                name=param["name"],
-                signed=False,
-                encoding=globals()[param["type"]],
-            )
-            entries_list.append(ParameterEntry(tm))
-        return entries_list
-    except:
-        return None
 
 
 def main():
@@ -44,19 +29,10 @@ def main():
         abstract=True,
     )
 
-
-    for cont in data["containers"]:
-        container = Container(
-                system=system,
-                name=cont["name"],
-                base=general_container ,
-                entries=set_entries_list(system, cont),
-            )
+    ctm.set_telemetry(system,data["containers"],general_container)
 
     with open("mdb/scsat1_header.xml", "wt") as f:
         system.dump(f)
-
-
 
 
 if __name__ == '__main__':

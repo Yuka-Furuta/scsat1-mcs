@@ -3,11 +3,11 @@ headers:
     base: "../csp-header"
     parameters:
       - name: "telemetry-id"
-        type: uint8_t
+        bit: 8
       - name: "srs3-reserved"
-        type: uint16_t
+        bit: 16
       - name: "srs3-id"
-        type: uint16_t 
+        bit: 16 
     conditions:
       - name: "/SCSAT1/csp-source-id"
         num: 21
@@ -22,31 +22,38 @@ containers:
         num: 0x7495
     parameters:
       - name: "temp_mcu"
-        type: int16_t
+        bit: 16
+        signed: true
       - name: "temp_power"
-        type: int16_t
+        bit: 16
+        signed: true
       - name: "temp_lna"
-        type: int16_t
+        bit: 16
+        signed: true
       - name: "temp_pa"
-        type: int16_t
+        bit: 16
+        signed: true
       - name: "volt_vin"
-        type: uint16_t
+        bit: 16
       - name: "volt_vreg"
-        type: uint16_t
+        bit: 16
       - name: "volt_3v3"
-        type: uint16_t
+        bit: 16
       - name: "curr_vin"
-        type: int16_t
+        bit: 16
+        signed: true
       - name: "curr_vreg"
-        type: int16_t
+        bit: 16
+        signed: true
       - name: "curr_3v3"
-        type: int16_t
+        bit: 16
+        signed: true
       - name: "power_vin"
-        type: uint16_t
+        bit: 16
       - name: "power_vreg"
-        type: uint16_t
+        bit: 16
       - name: "power_3v3"
-        type: uint16_t
+        bit: 16
 
   - name: SYS_BOOT_COUNT
     conditions:
@@ -54,7 +61,7 @@ containers:
         num: 0x428c
     parameters:
       - name: "boot_count"
-        type: uint32_t
+        bit: 32
 
   - name: SYS_GWDT_COUNTER
     conditions:
@@ -62,7 +69,7 @@ containers:
         num: 0x4290
     parameters:
       - name: "gwdt_counter"
-        type: uint32_t
+        bit: 32
 
   - name: TX
     conditions:
@@ -70,65 +77,74 @@ containers:
         num: 0x11e4
     parameters:
       - name: "tx_allow_always"
-        type: int8_t
+        bit: 8
+        signed: true
       - name: "tx_allow_time"
-        type: uint16_t
+        bit: 16
       - name: "tx_freq"
-        type: uint32_t
+        bit: 32
       - name: "tx_rate"
-        type: uint32_t
+        bit: 32
       - name: "tx_bt"
-        type: uint8_t
+        bit: 8
       - name: "tx_pout"
-        type: float32_t
+        type: float
+        bit: 32
       - name: "tx_gain"
-        type: uint16_t
+        bit: 16
       - name: "tx_alc_mode"
-        type: uint8_t
+        bit: 8
       - name: "tx_alc_kp"
-        type: float32_t
+        type: float
+        bit: 32
       - name: "tx_alc_limit"
-        type: uint16_t
+        bit: 16
       - name: "tx_alc_gain"
-        type: uint16_t
+        bit: 16
       - name: "tx_rs"
-        type: int8_t
+        bit: 8
+        signed: true
       - name: "tx_cc"
-        type: int8_t
+        bit: 8
+        signed: true
       - name: "tx_rand"
-        type: int8_t
+        bit: 8
+        signed: true
       - name: "tx_crc"
-        type: int8_t
+        bit: 8
+        signed: true
       - name: "tx_idle_frames"
-        type: uint16_t
+        bit: 16
       - name: "tx_train_type"
-        type: uint8_t
+        bit: 8
       - name: "tx_preamble"
-        type: uint16_t
+        bit: 16
       - name: "tx_postamble"
-        type: uint16_t
+        bit: 16
       - name: "tx_midamble"
-        type: uint16_t
+        bit: 16
       - name: "tx_size"
-        type: uint16_t
+        bit: 16
       - name: "tx_id"
-        type: uint16_t
+        bit: 16
       - name: "tx_crypto_key"
-        type: uint34_t 
+        bit: 34 
       - name: "tx_crypto_encrypt"
-        type: uint8_t
+        bit: 8
       - name: "tx_crypto_auth"
-        type: uint8_t
+        bit: 8
       - name: "tx_frames"
-        type: uint32_t
+        bit: 32
       - name: "tx_power_forward"
-        type: float32_t
+        type: float
+        bit: 32
       - name: "tx_power_reflection"
-        type: float32_t
+        type: float
+        bit: 32
       - name: "tx_over_power"
-        type: uint16_t
+        bit: 16
       - name: "tx_pll_nolock"
-        type: uint16_t
+        bit: 16
 
   - name: RX
     conditions:
@@ -136,41 +152,43 @@ containers:
         num: 0x4203
     parameters:
       - name: "rx_freq"
-        type: uint32_t
+        bit: 32
       - name: "rx_rate"
-        type: uint32_t
+        bit: 32
       - name: "rx_bw"
-        type: uint8_t
+        bit: 8
       - name: "rx_rs"
-        type: uint8_t
+        bit: 8
       - name: "rx_cc"
-        type: uint8_t
+        bit: 8
       - name: "rx_rand"
-        type: uint8_t
+        bit: 8
       - name: "rx_crc"
-        type: uint8_t
+        bit: 8
       - name: "rx_size"
-        type: uint16_t
+        bit: 16
       - name: "rx_id"
-        type: uint16_t
+        bit: 16
       - name: "rx_crypto_key"
-        type: uint34_t 
+        bit: 34 
       - name: "rx_crypto_decrypt"
-        type: uint8_t
+        bit: 8
       - name: "rx_crypto_auth"
-        type: uint8_t
+        bit: 8
       - name: "rx_local_drop"
-        type: uint8_t
+        bit: 8
       - name: "rx_frames"
-        type: uint32_t
+        bit: 32
       - name: "rx_detected"
-        type: uint32_t
+        bit: 32
       - name: "rx_rssi"
-        type: float32_t
+        type: float
+        bit: 32
       - name: "rx_freqerr"
-        type: float32_t
+        type: float
+        bit: 32
       - name: "rx_pll_nolock"
-        type: uint16_t
+        bit: 16
 
 
 
