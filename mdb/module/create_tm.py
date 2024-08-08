@@ -17,6 +17,11 @@ def set_encoding(param, endian):
             little_endian=endian,
             scheme=FloatEncodingScheme.IEEE754_1985
         )
+    elif param_type == "string":
+        enc = StringEncoding(
+            bits = param.get("bit", 64),
+
+        )
     else :
         print(f"encoding error: {param_type} is not defined.")
     
@@ -67,8 +72,14 @@ def set_entries_list(system, cont):
                     bits = param.get("bit", 64),
                     encoding = set_encoding(param, cont.get("endian",False)),
                 )
+            elif param.get("type", "int") == "string":
+                tm = StringParameter(
+                    system = system,
+                    name = param["name"],
+                    encoding = set_encoding(param, cont.get("endian",False)),
+                )
             else:
-                print("set parameter error\n")
+                print(f"set parameter error: "+param["name"]+"\n")
 
             entries_list.append(ParameterEntry(tm))
         return entries_list
