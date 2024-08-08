@@ -19,8 +19,11 @@ def set_encoding(param, endian):
         )
     elif param_type == "string":
         enc = StringEncoding(
-            bits = param.get("bit", 64),
-
+            bits = param.get("bit", 32)*8,
+        )
+    elif param_type == "binary":
+        enc = BinaryEncoding(
+            bits = param.get("bit", 80),
         )
     else :
         print(f"encoding error: {param_type} is not defined.")
@@ -74,6 +77,12 @@ def set_entries_list(system, cont):
                 )
             elif param.get("type", "int") == "string":
                 tm = StringParameter(
+                    system = system,
+                    name = param["name"],
+                    encoding = set_encoding(param, cont.get("endian",False)),
+                )
+            elif param.get("type", "int") == "binary":
+                tm = BinaryParameter(
                     system = system,
                     name = param["name"],
                     encoding = set_encoding(param, cont.get("endian",False)),
