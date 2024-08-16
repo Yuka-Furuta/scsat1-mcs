@@ -2166,7 +2166,11 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <VerifierSet/>
       </MetaCommand>
       <MetaCommand name="GWDT_RESET" abstract="false">
-        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand">
+          <ArgumentAssignmentList>
+            <ArgumentAssignment argumentName="csp_dport" argumentValue="16"/>
+          </ArgumentAssignmentList>
+        </BaseMetaCommand>
         <ArgumentList>
           <Argument name="command_id" argumentTypeRef="GWDT_RESET__command_id"/>
           <Argument name="magic_num" argumentTypeRef="GWDT_RESET__magic_num"/>
@@ -2216,7 +2220,11 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <VerifierSet/>
       </MetaCommand>
       <MetaCommand name="HW_RESET" abstract="false">
-        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand">
+          <ArgumentAssignmentList>
+            <ArgumentAssignment argumentName="csp_dport" argumentValue="15"/>
+          </ArgumentAssignmentList>
+        </BaseMetaCommand>
         <ArgumentList>
           <Argument name="command_id" argumentTypeRef="HW_RESET__command_id"/>
           <Argument name="magic_num" argumentTypeRef="HW_RESET__magic_num"/>

@@ -23,27 +23,15 @@ def get_argument():
     return parser.parse_args()
 
 def create_header_tm(yaml):
-    # yaml_file = "/home/yuka/myproject/task/scsat1-mcs/mdb/data/header.yaml"
-
-    # with open(yaml_file, 'r') as file:
-    #     data = yaml.load(file)
-
     system = System("SCSAT1")
     csp_header = csp.add_csp_header(system, ids=Subsystem)
-    # general_container = Container(
-    #     system=system,
-    #     name="scsat1",
-    #     abstract=True,
-    # )
-
-    # ctm.set_telemetry(system,data["containers"],general_container)
 
     with open("mdb/scsat1_header.xml", "wt") as f:
         system.dump(f)
 
 
 def create_tm(system,yaml, sys_name):
-    yaml_file = f"/home/yuka/myproject/task/scsat1-mcs/mdb/data/{sys_name}_tm.yaml"
+    yaml_file = f"mdb/data/{sys_name}_tm.yaml"
     with open(yaml_file, 'r') as file:
         data = yaml.load(file)
 
@@ -53,6 +41,62 @@ def create_tm(system,yaml, sys_name):
     ctm.set_telemetry(system,data["containers"], header_container)
             
 
+def set_command(system,csp_header,base,tc_data):
+    for commands in tc_data:
+        for tc in commands["commands"]:
+            arg_list = []
+            entries_list = []
+            if tc.get("arguments",None) != None:
+                for arguments in tc["arguments"]:
+                    if arguments.get("type","int") == "binary":
+                        argument = BinaryArgument(
+                            name = arguments["name"],
+                            encoding = BinaryEncoding(bits = arguments.get("bit",48)),
+                            default = arguments.get("num",None),
+                        )
+                    elif arguments.get("type","int") == "int":
+                        argument = IntegerArgument(
+                            name = arguments["name"],
+                            encoding = IntegerEncoding(bits = arguments.get("bit",16)),
+                            default = arguments.get("num",None),
+                        )
+                    else:
+                        print("not defined argument type")
+                        sys.exit(1)
+                    arg_list.append(argument)
+                    entries_list.append(ArgumentEntry(argument))
+
+            tc_command = Command(
+                system = system,
+                base = base,
+                name = tc["name"],
+                assignments={
+                    csp_header.tc_dport.name: tc["port"],
+                }, 
+                arguments = arg_list,
+                entries = entries_list,
+            )
+
+def create_tc(system,yaml,sys_name):
+    yaml_file2 = f"mdb/data/{sys_name}_tc.yaml"
+    with open(yaml_file2, 'r') as file:
+        tc_data = yaml.load(file)
+
+    csp_header = csp.add_csp_header(system, ids=Subsystem)
+
+    general_command = Command(
+        system=system,
+        name="MyGeneralCommand",
+        abstract=True,
+        base=csp_header.tc_container,
+        assignments={
+            csp_header.tc_dst.name:sys_name.upper(),
+            csp_header.tc_src.name: "YAMCS",
+        },
+    )
+    #　一旦別々に呼ぶ形にする　csp_commands を各ファイルに書いているので、、
+    set_command(system,csp_header,general_command,tc_data["csp_commands"])
+    set_command(system,csp_header,general_command,tc_data["default_commands"])
 
 def main():
     # option
@@ -65,9 +109,9 @@ def main():
 
     yaml = YAML()
     system = System(sys_name.upper())
-    csp_header = csp.add_csp_header(system, ids=Subsystem)
     create_header_tm(yaml)
     create_tm(system,yaml,sys_name)
+    create_tc(system,yaml,sys_name)
 
     with open(f"mdb/scsat1_{sys_name}.xml", "wt") as f:
         system.dump(f)

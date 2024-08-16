@@ -91,13 +91,13 @@ def main():
         abstract=True,
         base=csp_header.tc_container,
         assignments={
-            csp_header.tc_dst.name:4,
+            csp_header.tc_dst.name:"EPS",
             csp_header.tc_src.name: 12,
         },
     )
 
     csp_common_command(system,csp_header,general_command,tc_data)
-    # port 等は何も指定してない
+ 
     eps_command(system,csp_header,general_command,tc_data)
 
 

@@ -18,8 +18,18 @@ default_commands:
   - name: eps_command
     commands:
       - name: "GWDT_RESET"
-        command_id: 0
-        magic_num: 30868
+        port: 16
+        arguments:
+          - name: command_id
+            bit: 8
+            num: 0
+          - name: magic_num
+            num: 30868
       - name: "HW_RESET"
-        command_id: 1
-        magic_num: 17767
+        port: 15
+        arguments:
+          - name: command_id
+            bit: 8
+            num: 1
+          - name: magic_num
+            num: 17767
