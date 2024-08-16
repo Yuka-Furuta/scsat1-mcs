@@ -835,5 +835,167 @@ See https://github.com/yamcs/pymdb
       </SequenceContainer>
     </ContainerSet>
   </TelemetryMetaData>
-  <CommandMetaData/>
+  <CommandMetaData>
+    <ArgumentTypeSet>
+      <BinaryArgumentType name="SRS-3 RX group data__binary_id" initialValue="0101C8000200">
+        <BinaryDataEncoding>
+          <SizeInBits>
+            <FixedValue>48</FixedValue>
+          </SizeInBits>
+        </BinaryDataEncoding>
+      </BinaryArgumentType>
+      <BinaryArgumentType name="SRS-3 SYS group data__binary_id" initialValue="0101C8000280">
+        <BinaryDataEncoding>
+          <SizeInBits>
+            <FixedValue>48</FixedValue>
+          </SizeInBits>
+        </BinaryDataEncoding>
+      </BinaryArgumentType>
+      <BinaryArgumentType name="SRS-3 TX group data__binary_id" initialValue="0101C8000180">
+        <BinaryDataEncoding>
+          <SizeInBits>
+            <FixedValue>48</FixedValue>
+          </SizeInBits>
+        </BinaryDataEncoding>
+      </BinaryArgumentType>
+      <BinaryArgumentType name="SRS-3 WDT count__binary_id" initialValue="0101C8004290">
+        <BinaryDataEncoding>
+          <SizeInBits>
+            <FixedValue>48</FixedValue>
+          </SizeInBits>
+        </BinaryDataEncoding>
+      </BinaryArgumentType>
+      <BinaryArgumentType name="SRS-3 boot count__binary_id" initialValue="0101C800428C">
+        <BinaryDataEncoding>
+          <SizeInBits>
+            <FixedValue>48</FixedValue>
+          </SizeInBits>
+        </BinaryDataEncoding>
+      </BinaryArgumentType>
+      <BinaryArgumentType name="SRS-3 telemetry data__binary_id" initialValue="0101C8000480">
+        <BinaryDataEncoding>
+          <SizeInBits>
+            <FixedValue>48</FixedValue>
+          </SizeInBits>
+        </BinaryDataEncoding>
+      </BinaryArgumentType>
+    </ArgumentTypeSet>
+    <MetaCommandSet>
+      <MetaCommand name="MyGeneralCommand" abstract="true">
+        <CommandContainer name="MyGeneralCommand">
+          <EntryList/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+      <MetaCommand name="SRS-3 RX group data" abstract="false">
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <ArgumentList>
+          <Argument name="binary_id" argumentTypeRef="SRS-3 RX group data__binary_id"/>
+        </ArgumentList>
+        <CommandContainer name="SRS-3 RX group data">
+          <EntryList>
+            <ArgumentRefEntry argumentRef="binary_id">
+              <LocationInContainerInBits referenceLocation="previousEntry">
+                <FixedValue>0</FixedValue>
+              </LocationInContainerInBits>
+            </ArgumentRefEntry>
+          </EntryList>
+          <BaseContainer containerRef="MyGeneralCommand"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+      <MetaCommand name="SRS-3 SYS group data" abstract="false">
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <ArgumentList>
+          <Argument name="binary_id" argumentTypeRef="SRS-3 SYS group data__binary_id"/>
+        </ArgumentList>
+        <CommandContainer name="SRS-3 SYS group data">
+          <EntryList>
+            <ArgumentRefEntry argumentRef="binary_id">
+              <LocationInContainerInBits referenceLocation="previousEntry">
+                <FixedValue>0</FixedValue>
+              </LocationInContainerInBits>
+            </ArgumentRefEntry>
+          </EntryList>
+          <BaseContainer containerRef="MyGeneralCommand"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+      <MetaCommand name="SRS-3 TX group data" abstract="false">
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <ArgumentList>
+          <Argument name="binary_id" argumentTypeRef="SRS-3 TX group data__binary_id"/>
+        </ArgumentList>
+        <CommandContainer name="SRS-3 TX group data">
+          <EntryList>
+            <ArgumentRefEntry argumentRef="binary_id">
+              <LocationInContainerInBits referenceLocation="previousEntry">
+                <FixedValue>0</FixedValue>
+              </LocationInContainerInBits>
+            </ArgumentRefEntry>
+          </EntryList>
+          <BaseContainer containerRef="MyGeneralCommand"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+      <MetaCommand name="SRS-3 WDT count" abstract="false">
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <ArgumentList>
+          <Argument name="binary_id" argumentTypeRef="SRS-3 WDT count__binary_id"/>
+        </ArgumentList>
+        <CommandContainer name="SRS-3 WDT count">
+          <EntryList>
+            <ArgumentRefEntry argumentRef="binary_id">
+              <LocationInContainerInBits referenceLocation="previousEntry">
+                <FixedValue>0</FixedValue>
+              </LocationInContainerInBits>
+            </ArgumentRefEntry>
+          </EntryList>
+          <BaseContainer containerRef="MyGeneralCommand"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+      <MetaCommand name="SRS-3 boot count" abstract="false">
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <ArgumentList>
+          <Argument name="binary_id" argumentTypeRef="SRS-3 boot count__binary_id"/>
+        </ArgumentList>
+        <CommandContainer name="SRS-3 boot count">
+          <EntryList>
+            <ArgumentRefEntry argumentRef="binary_id">
+              <LocationInContainerInBits referenceLocation="previousEntry">
+                <FixedValue>0</FixedValue>
+              </LocationInContainerInBits>
+            </ArgumentRefEntry>
+          </EntryList>
+          <BaseContainer containerRef="MyGeneralCommand"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+      <MetaCommand name="SRS-3 telemetry data" abstract="false">
+        <BaseMetaCommand metaCommandRef="MyGeneralCommand"/>
+        <ArgumentList>
+          <Argument name="binary_id" argumentTypeRef="SRS-3 telemetry data__binary_id"/>
+        </ArgumentList>
+        <CommandContainer name="SRS-3 telemetry data">
+          <EntryList>
+            <ArgumentRefEntry argumentRef="binary_id">
+              <LocationInContainerInBits referenceLocation="previousEntry">
+                <FixedValue>0</FixedValue>
+              </LocationInContainerInBits>
+            </ArgumentRefEntry>
+          </EntryList>
+          <BaseContainer containerRef="MyGeneralCommand"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+    </MetaCommandSet>
+  </CommandMetaData>
 </SpaceSystem>
