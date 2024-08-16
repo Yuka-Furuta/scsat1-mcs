@@ -1,13 +1,15 @@
 headers:
+  - name: "common_container"
+    base: "../csp_message"
+    conditions:
+      - name: "../csp_src"
+        num: MAIN
   - name: "main_container"
-    base: "../csp-header"
+    base: "common_container"
     parameters:
       - name: "telemetry-id"
         bit: 8
-    conditions:
-      - name: "/SCSAT1/csp-source-id"
-        num: 1
-
+        
 containers:
   - name: TEMP
     endian: true

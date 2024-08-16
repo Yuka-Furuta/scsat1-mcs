@@ -1,13 +1,14 @@
 headers:
+  - name: "common_container"
+    base: "../csp_message"
+    conditions:
+      - name: "../csp_src"
+        num: ADCS
   - name: "adcs_container"
-    base: "../csp-header"
+    base: "common_container"
     parameters:
       - name: "telemetry_id"
         bit: 1
-
-    conditions:
-      - name: "/SCSAT1/csp-source-id"
-        num: 4
 
 containers:
   - name: TEMP

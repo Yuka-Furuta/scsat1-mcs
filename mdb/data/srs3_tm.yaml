@@ -1,24 +1,59 @@
 headers:
-  - name: "srs3-header"
-    base: "../csp-header"
+  - name: "common_container"
+    base: "../csp_message"
+    conditions:
+      - name: "../csp_src"
+        num: SRS3
+  - name: "srs3_header"
+    base: "common_container"
     parameters:
-      - name: "telemetry-id"
+      - name: "telemetry_id"
         bit: 8
-      - name: "srs3-reserved"
+      - name: "srs3_reserved"
         bit: 16
-      - name: "srs3-id"
+      - name: "srs3_id"
         bit: 16 
     conditions:
-      - name: "/SCSAT1/csp-source-id"
-        num: 21
-      - name: "/SCSAT1/csp-source-port"
+      - name: "SRS3/csp_sport"
         num: 19
    
 
 containers:
+  - name: ping
+    base: "common_container"
+    conditions:
+      - name: "../csp_sport"
+        num: 1
+    parameters:
+      - name: "ping_value"
+  - name: Get_amount_free
+    base: "common_container"
+    conditions:
+      - name: "../csp_sport"
+        num: 3
+    parameters:
+      - name: "amount_free_memory"
+        bit: 32
+  - name: Get_amount
+    base: "common_container"
+    conditions:
+      - name: "../csp_sport"
+        num: 5
+    parameters:
+      - name: "amount_memory"
+        bit: 32
+  - name: Sysup_time
+    base: "common_container"
+    conditions:
+      - name: "../csp_sport"
+        num: 6
+    parameters:
+      - name: "Sysup_time"
+        bit: 32
+        
   - name: TM
     conditions:
-      - name: "SRS3/srs3-id"
+      - name: "SRS3/srs3_id"
         num: 0x7495
     parameters:
       - name: "temp_mcu"
@@ -57,7 +92,7 @@ containers:
 
   - name: SYS_BOOT_COUNT
     conditions:
-      - name: "SRS3/srs3-id"
+      - name: "SRS3/srs3_id"
         num: 0x428c
     parameters:
       - name: "boot_count"
@@ -65,7 +100,7 @@ containers:
 
   - name: SYS_GWDT_COUNTER
     conditions:
-      - name: "SRS3/srs3-id"
+      - name: "SRS3/srs3_id"
         num: 0x4290
     parameters:
       - name: "gwdt_counter"
@@ -73,7 +108,7 @@ containers:
 
   - name: TX
     conditions:
-      - name: "SRS3/srs3-id"
+      - name: "SRS3/srs3_id"
         num: 0x11e4
     parameters:
       - name: "tx_allow_always"
@@ -148,7 +183,7 @@ containers:
 
   - name: RX
     conditions:
-      - name: "SRS3/srs3-id"
+      - name: "SRS3/srs3_id"
         num: 0x4203
     parameters:
       - name: "rx_freq"

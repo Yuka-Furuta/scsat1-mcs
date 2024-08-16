@@ -2,10 +2,10 @@ from yamcs.pymdb import *
 def set_encoding(param, endian):
     param_type = param.get("type", "int")
     if param_type == "int":
-        if param.get("signed", False) == True:
-            scheme = IntegerEncodingScheme.TWOS_COMPLEMENT
-        else:
+        if param.get("signed", False) == False:
             scheme = IntegerEncodingScheme.UNSIGNED
+        else:
+            scheme = IntegerEncodingScheme.TWOS_COMPLEMENT
         enc = IntegerEncoding(
             bits = param.get("bit", 16),
             little_endian=endian,
@@ -49,7 +49,7 @@ def set_telemetry(system,data,base,abstract = False):
         container = Container(
             system = system,
             name = cont["name"],
-            base = base,
+            base = cont.get("base",base),
             entries = set_entries_list(system, cont),
             abstract = abstract,
             condition = set_conditions(cont),
