@@ -14,11 +14,17 @@ headers:
       - name: "srs3_id"
         bit: 16 
     conditions:
-      - name: "SRS3/csp_sport"
+      - name: "../csp_sport"
         num: 19
-   
+
+# default設定
+# endian: false
+# type: int
+# signed: false
+# bit: 16
 
 containers:
+# csp 共通 reply
   - name: ping
     base: "common_container"
     conditions:
@@ -50,7 +56,24 @@ containers:
     parameters:
       - name: "Sysup_time"
         bit: 32
-        
+
+# SYS_group_dataのreply
+# paramter 不明
+ # 21byte, 207byte, 207byte
+  - name: SYS_1
+    conditions:
+    - name: "SRS3/srs3_id"
+      num: 0x0
+  - name: SYS_2
+    conditions:
+    - name: "SRS3/srs3_id"
+      num: 0x3136
+  - name: SYS_3
+    conditions:
+    - name: "SRS3/srs3_id"
+      num: 0xC285
+
+# Command reply
   - name: TM
     conditions:
       - name: "SRS3/srs3_id"

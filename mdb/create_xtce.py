@@ -35,7 +35,6 @@ def create_tm(system,yaml, sys_name):
     with open(yaml_file, 'r') as file:
         data = yaml.load(file)
 
-    # EPS Parameter
     header_container = ctm.create_header(system,data["headers"])
 
     ctm.set_telemetry(system,data["containers"], header_container)
@@ -44,28 +43,35 @@ def create_tm(system,yaml, sys_name):
 def set_command(system,csp_header,base,tc_data):
     for commands in tc_data:
         for tc in commands["commands"]:
+            # arguments 設定
             arg_list = []
             entries_list = []
             if tc.get("arguments",None) != None:
                 for arguments in tc["arguments"]:
-                    if arguments.get("type","int") == "binary":
-                        argument = BinaryArgument(
-                            name = arguments["name"],
-                            encoding = BinaryEncoding(bits = arguments.get("bit",48)),
-                            default = arguments.get("num",None),
-                        )
-                    elif arguments.get("type","int") == "int":
+                    if arguments.get("type","int") == "int":
                         argument = IntegerArgument(
                             name = arguments["name"],
-                            encoding = IntegerEncoding(bits = arguments.get("bit",16)),
+                            encoding = ctm.set_encoding(arguments, tc.get("endian",False)),
                             default = arguments.get("num",None),
                         )
+                    elif arguments.get("type","int") == "binary":
+                        argument = BinaryArgument(
+                            name = arguments["name"],
+                            encoding = ctm.set_encoding(arguments, tc.get("endian",False)),
+                            default = arguments.get("num",None),
+                        )
+                    elif arguments.get("type","int") == "string":
+                        # 動作確認してない　mainに含まれるコマンド
+                        argument = StringArgument(
+                            name = arguments["name"],
+                        )
                     else:
-                        print("not defined argument type")
+                        print("Not defined argument type")
                         sys.exit(1)
                     arg_list.append(argument)
                     entries_list.append(ArgumentEntry(argument))
-
+            
+            # Command 作成
             tc_command = Command(
                 system = system,
                 base = base,

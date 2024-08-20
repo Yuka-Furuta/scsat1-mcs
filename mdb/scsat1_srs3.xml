@@ -649,6 +649,48 @@ See https://github.com/yamcs/pymdb
           </RestrictionCriteria>
         </BaseContainer>
       </SequenceContainer>
+      <SequenceContainer name="SYS_1" abstract="false">
+        <EntryList/>
+        <BaseContainer containerRef="srs3_header">
+          <RestrictionCriteria>
+            <BooleanExpression>
+              <Condition>
+                <ParameterInstanceRef parameterRef="SRS3/srs3_id" useCalibratedValue="true"/>
+                <ComparisonOperator>==</ComparisonOperator>
+                <Value>0</Value>
+              </Condition>
+            </BooleanExpression>
+          </RestrictionCriteria>
+        </BaseContainer>
+      </SequenceContainer>
+      <SequenceContainer name="SYS_2" abstract="false">
+        <EntryList/>
+        <BaseContainer containerRef="srs3_header">
+          <RestrictionCriteria>
+            <BooleanExpression>
+              <Condition>
+                <ParameterInstanceRef parameterRef="SRS3/srs3_id" useCalibratedValue="true"/>
+                <ComparisonOperator>==</ComparisonOperator>
+                <Value>12598</Value>
+              </Condition>
+            </BooleanExpression>
+          </RestrictionCriteria>
+        </BaseContainer>
+      </SequenceContainer>
+      <SequenceContainer name="SYS_3" abstract="false">
+        <EntryList/>
+        <BaseContainer containerRef="srs3_header">
+          <RestrictionCriteria>
+            <BooleanExpression>
+              <Condition>
+                <ParameterInstanceRef parameterRef="SRS3/srs3_id" useCalibratedValue="true"/>
+                <ComparisonOperator>==</ComparisonOperator>
+                <Value>49797</Value>
+              </Condition>
+            </BooleanExpression>
+          </RestrictionCriteria>
+        </BaseContainer>
+      </SequenceContainer>
       <SequenceContainer name="SYS_BOOT_COUNT" abstract="false">
         <EntryList>
           <ParameterRefEntry parameterRef="boot_count">
@@ -1075,7 +1117,7 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
           <RestrictionCriteria>
             <BooleanExpression>
               <Condition>
-                <ParameterInstanceRef parameterRef="SRS3/csp_sport" useCalibratedValue="true"/>
+                <ParameterInstanceRef parameterRef="../csp_sport" useCalibratedValue="true"/>
                 <ComparisonOperator>==</ComparisonOperator>
                 <Value>19</Value>
               </Condition>

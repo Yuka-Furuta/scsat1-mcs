@@ -11,13 +11,14 @@ headers:
         bit: 8
 
 
-# default
+# default 設定
 # endian: false
 # type: int
 # signed: false
 # bit: 16
 
 containers:
+# csp 共通 reply
   - name: ping
     base: "common_container"
     conditions:
@@ -50,6 +51,31 @@ containers:
       - name: "Sysup_time"
         bit: 32
 
+# Command reply
+  - name: GWDT_RESET
+    base: "esp_container"
+    conditions:
+      - name: "../csp_sport"
+        num: 16
+      - name: "EPS/command_id"
+        num: 0
+    parameters:
+      - name: "GWDT_error_code"
+        bit: 8
+        signed: true
+  - name: HW_RESET
+    base: "esp_container"
+    conditions:
+      - name: "../csp_sport"
+        num: 15      
+      - name: "EPS/command_id"
+        num: 1
+    parameters:
+      - name: "HW_status"
+        bit: 8
+        signed: true
+
+# esp original
   - name: GENENAL_HK_TLM
     endian: true
     conditions:

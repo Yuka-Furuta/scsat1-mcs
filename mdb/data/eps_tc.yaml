@@ -19,6 +19,7 @@ default_commands:
     commands:
       - name: "GWDT_RESET"
         port: 16
+        endian: true
         arguments:
           - name: command_id
             bit: 8
@@ -27,9 +28,17 @@ default_commands:
             num: 30868
       - name: "HW_RESET"
         port: 15
+        endian: true
         arguments:
           - name: command_id
             bit: 8
             num: 1
           - name: magic_num
             num: 17767
+      - name: "GET_TM"
+        port: 7
+        endian: true
+        arguments:
+          - name: command_id
+            bit: 8
+            num: 0
