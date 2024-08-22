@@ -35,12 +35,6 @@ default_commands:
           - name: command_id
             type: binary
             num: 0101C8000200
-      - name: "SRS-3 SYS group data"
-        port: 19
-        arguments:
-          - name: command_id
-            type: binary
-            num: 0101C8000280
       - name: "SRS-3 boot count"
         port: 19
         arguments:

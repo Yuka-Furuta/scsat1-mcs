@@ -16,9 +16,8 @@ See https://github.com/yamcs/pymdb
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedParameterType>
@@ -44,9 +43,8 @@ See https://github.com/yamcs/pymdb
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedParameterType>
@@ -166,9 +164,8 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedArgumentType>
@@ -176,9 +173,8 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedArgumentType>

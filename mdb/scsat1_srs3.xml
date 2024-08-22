@@ -28,9 +28,8 @@ See https://github.com/yamcs/pymdb
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedParameterType>
@@ -56,9 +55,8 @@ See https://github.com/yamcs/pymdb
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedParameterType>
@@ -649,48 +647,6 @@ See https://github.com/yamcs/pymdb
           </RestrictionCriteria>
         </BaseContainer>
       </SequenceContainer>
-      <SequenceContainer name="SYS_1" abstract="false">
-        <EntryList/>
-        <BaseContainer containerRef="srs3_header">
-          <RestrictionCriteria>
-            <BooleanExpression>
-              <Condition>
-                <ParameterInstanceRef parameterRef="SRS3/srs3_id" useCalibratedValue="true"/>
-                <ComparisonOperator>==</ComparisonOperator>
-                <Value>0</Value>
-              </Condition>
-            </BooleanExpression>
-          </RestrictionCriteria>
-        </BaseContainer>
-      </SequenceContainer>
-      <SequenceContainer name="SYS_2" abstract="false">
-        <EntryList/>
-        <BaseContainer containerRef="srs3_header">
-          <RestrictionCriteria>
-            <BooleanExpression>
-              <Condition>
-                <ParameterInstanceRef parameterRef="SRS3/srs3_id" useCalibratedValue="true"/>
-                <ComparisonOperator>==</ComparisonOperator>
-                <Value>12598</Value>
-              </Condition>
-            </BooleanExpression>
-          </RestrictionCriteria>
-        </BaseContainer>
-      </SequenceContainer>
-      <SequenceContainer name="SYS_3" abstract="false">
-        <EntryList/>
-        <BaseContainer containerRef="srs3_header">
-          <RestrictionCriteria>
-            <BooleanExpression>
-              <Condition>
-                <ParameterInstanceRef parameterRef="SRS3/srs3_id" useCalibratedValue="true"/>
-                <ComparisonOperator>==</ComparisonOperator>
-                <Value>49797</Value>
-              </Condition>
-            </BooleanExpression>
-          </RestrictionCriteria>
-        </BaseContainer>
-      </SequenceContainer>
       <SequenceContainer name="SYS_BOOT_COUNT" abstract="false">
         <EntryList>
           <ParameterRefEntry parameterRef="boot_count">
@@ -1139,13 +1095,6 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
           </SizeInBits>
         </BinaryDataEncoding>
       </BinaryArgumentType>
-      <BinaryArgumentType name="SRS-3 SYS group data__command_id" initialValue="0101C8000280">
-        <BinaryDataEncoding>
-          <SizeInBits>
-            <FixedValue>48</FixedValue>
-          </SizeInBits>
-        </BinaryDataEncoding>
-      </BinaryArgumentType>
       <BinaryArgumentType name="SRS-3 TX group data__command_id" initialValue="0101C8000180">
         <BinaryDataEncoding>
           <SizeInBits>
@@ -1187,9 +1136,8 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedArgumentType>
@@ -1197,9 +1145,8 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <IntegerDataEncoding sizeInBits="5" encoding="unsigned"/>
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
-          <Enumeration value="2" label="COM"/>
-          <Enumeration value="3" label="ADCS"/>
-          <Enumeration value="12" label="YAMCS"/>
+          <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
       </EnumeratedArgumentType>
@@ -1305,28 +1252,6 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
           <Argument name="command_id" argumentTypeRef="SRS-3 RX group data__command_id"/>
         </ArgumentList>
         <CommandContainer name="SRS-3 RX group data">
-          <EntryList>
-            <ArgumentRefEntry argumentRef="command_id">
-              <LocationInContainerInBits referenceLocation="previousEntry">
-                <FixedValue>0</FixedValue>
-              </LocationInContainerInBits>
-            </ArgumentRefEntry>
-          </EntryList>
-          <BaseContainer containerRef="MyGeneralCommand"/>
-        </CommandContainer>
-        <DefaultSignificance consequenceLevel="normal"/>
-        <VerifierSet/>
-      </MetaCommand>
-      <MetaCommand name="SRS-3 SYS group data" abstract="false">
-        <BaseMetaCommand metaCommandRef="MyGeneralCommand">
-          <ArgumentAssignmentList>
-            <ArgumentAssignment argumentName="csp_dport" argumentValue="19"/>
-          </ArgumentAssignmentList>
-        </BaseMetaCommand>
-        <ArgumentList>
-          <Argument name="command_id" argumentTypeRef="SRS-3 SYS group data__command_id"/>
-        </ArgumentList>
-        <CommandContainer name="SRS-3 SYS group data">
           <EntryList>
             <ArgumentRefEntry argumentRef="command_id">
               <LocationInContainerInBits referenceLocation="previousEntry">
