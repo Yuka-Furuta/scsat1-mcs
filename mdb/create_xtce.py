@@ -12,6 +12,16 @@ class Subsystem(Enum):
     YAMCS = 22
     SRS3 = 21
 
+
+def get_argument():
+    # オブジェクト生成
+    parser = argparse.ArgumentParser()
+    # 引数設定
+    parser.add_argument("--data", choices = ["srs3","eps","main","adcs"])
+
+    return parser.parse_args()
+
+
 def set_encoding(param, endian):
     param_type = param.get("type", "int")
     if param_type == "int":
@@ -44,7 +54,32 @@ def set_encoding(param, endian):
     return enc
 
 
-def create_header(system,data):
+def set_conditions(cont):
+    try:
+        condition_data = cont["conditions"]
+        if len(condition_data) > 1:
+            exp = []
+            for cond in condition_data:
+                exp.append(eq(cond["name"], cond["num"], calibrated=True))
+            return all_of(*exp)
+
+        else:
+            for cond in condition_data:
+                exp = eq(cond["name"], cond["num"], calibrated=True)
+            return exp
+    except:
+        return None
+
+
+def create_header(yaml):
+    system = System("SCSAT1")
+    csp_header = csp.add_csp_header(system, ids=Subsystem)
+
+    with open("mdb/scsat1_header.xml", "wt") as f:
+        system.dump(f)
+
+# subsystem header
+def create_header_sub(system,data):
     for cont in data:
         header_container = Container(
             system=system,
@@ -56,19 +91,7 @@ def create_header(system,data):
         )
     return header_container
 
-
-def set_telemetry(system,data,base,abstract = False):
-    for cont in data:
-        container = Container(
-            system = system,
-            name = cont["name"],
-            base = cont.get("base",base),
-            entries = set_entries_list(system, cont),
-            abstract = abstract,
-            condition = set_conditions(cont),
-        )
-    return container
-
+# Telemetry
 def set_entries_list(system, cont):
     try:
         param_data = cont["parameters"]
@@ -108,39 +131,17 @@ def set_entries_list(system, cont):
     except:
         return None
 
-
-def set_conditions(cont):
-    try:
-        condition_data = cont["conditions"]
-        if len(condition_data) > 1:
-            exp = []
-            for cond in condition_data:
-                exp.append(eq(cond["name"], cond["num"], calibrated=True))
-            return all_of(*exp)
-
-        else:
-            for cond in condition_data:
-                exp = eq(cond["name"], cond["num"], calibrated=True)
-            return exp
-    except:
-        return None
-
-
-def get_argument():
-    # オブジェクト生成
-    parser = argparse.ArgumentParser()
-    # 引数設定
-    parser.add_argument("--data", choices = ["srs3","eps","main","adcs"])
-
-    return parser.parse_args()
-
-def create_header_tm(yaml):
-    system = System("SCSAT1")
-    csp_header = csp.add_csp_header(system, ids=Subsystem)
-
-    with open("mdb/scsat1_header.xml", "wt") as f:
-        system.dump(f)
-
+def set_telemetry(system,data,base,abstract = False):
+    for cont in data:
+        container = Container(
+            system = system,
+            name = cont["name"],
+            base = cont.get("base",base),
+            entries = set_entries_list(system, cont),
+            abstract = abstract,
+            condition = set_conditions(cont),
+        )
+    return container
 
 def create_tm(system,yaml, sys_name):
     yaml_file = f"mdb/data/{sys_name}_tm.yaml"
@@ -148,54 +149,55 @@ def create_tm(system,yaml, sys_name):
         with open(yaml_file, 'r') as file:
             data = yaml.load(file)
 
-        header_container = create_header(system,data["headers"])
+        header_container = create_header_sub(system,data["headers"])
 
         set_telemetry(system,data["containers"], header_container)
     except:
         print(f"Warning: Telemetry was not created. '{yaml_file}' does not exist.")
             
-
+# Command
 def set_command(system,csp_header,base,tc_data):
-    for commands in tc_data:
-        for tc in commands["commands"]:
-            # arguments 設定
-            arg_list = []
-            entries_list = []
-            if tc.get("arguments",None) != None:
-                for arguments in tc["arguments"]:
-                    if arguments.get("type","int") == "int":
-                        argument = IntegerArgument(
-                            name = arguments["name"],
-                            encoding = set_encoding(arguments, tc.get("endian",False)),
-                            default = arguments.get("num",None),
-                        )
-                    elif arguments.get("type","int") == "binary":
-                        argument = BinaryArgument(
-                            name = arguments["name"],
-                            encoding = set_encoding(arguments, tc.get("endian",False)),
-                            default = arguments.get("num",None),
-                        )
-                    elif arguments.get("type","int") == "string":
-                        argument = StringArgument(
-                            name = arguments["name"],
-                        )
-                    else:
-                        print("Not defined argument type")
-                        sys.exit(1)
-                    arg_list.append(argument)
-                    entries_list.append(ArgumentEntry(argument))
-            
-            # Command 作成
-            tc_command = Command(
-                system = system,
-                base = base,
-                name = tc["name"],
-                assignments={
-                    csp_header.tc_dport.name: tc["port"],
-                }, 
-                arguments = arg_list,
-                entries = entries_list,
-            )
+    for i in tc_data:
+        for commands in tc_data[i]:
+            for tc in commands["commands"]:
+                # arguments 設定
+                arg_list = []
+                entries_list = []
+                if tc.get("arguments",None) != None:
+                    for arguments in tc["arguments"]:
+                        if arguments.get("type","int") == "int":
+                            argument = IntegerArgument(
+                                name = arguments["name"],
+                                encoding = set_encoding(arguments, tc.get("endian",False)),
+                                default = arguments.get("num",None),
+                            )
+                        elif arguments.get("type","int") == "binary":
+                            argument = BinaryArgument(
+                                name = arguments["name"],
+                                encoding = set_encoding(arguments, tc.get("endian",False)),
+                                default = arguments.get("num",None),
+                            )
+                        elif arguments.get("type","int") == "string":
+                            argument = StringArgument(
+                                name = arguments["name"],
+                            )
+                        else:
+                            print("Not defined argument type")
+                            sys.exit(1)
+                        arg_list.append(argument)
+                        entries_list.append(ArgumentEntry(argument))
+                
+                # Command 作成
+                tc_command = Command(
+                    system = system,
+                    base = base,
+                    name = tc["name"],
+                    assignments={
+                        csp_header.tc_dport.name: tc["port"],
+                    }, 
+                    arguments = arg_list,
+                    entries = entries_list,
+                )
 
 def create_tc(system,yaml,sys_name):
     yaml_file = f"mdb/data/{sys_name}_tc.yaml"
@@ -215,9 +217,7 @@ def create_tc(system,yaml,sys_name):
                 csp_header.tc_src.name: "YAMCS",
             },
         )
-        #　一旦別々に呼ぶ形にする　csp_commands を各ファイルに書いているので、、
-        set_command(system,csp_header,general_command,tc_data["csp_commands"])
-        set_command(system,csp_header,general_command,tc_data["default_commands"])
+        set_command(system,csp_header,general_command,tc_data)
     except:
         print(f"Warning: Command was not created. '{yaml_file}' does not exist.")
 
@@ -232,7 +232,7 @@ def main():
 
     yaml = YAML()
     system = System(sys_name.upper())
-    create_header_tm(yaml)
+    create_header(yaml)
     create_tm(system,yaml,sys_name)
     create_tc(system,yaml,sys_name)
 
