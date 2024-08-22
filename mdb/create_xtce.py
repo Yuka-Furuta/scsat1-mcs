@@ -98,8 +98,7 @@ def set_conditions(cont):
             for cond in condition_data:
                 exp = eq(cond["name"], cond["num"], calibrated=True)
             return exp
-    except KeyError as e:
-        print(e)
+    except KeyError:
         return None
 
 
@@ -162,8 +161,7 @@ def set_entries_list(system, cont):
 
             entries_list.append(ParameterEntry(tm))
         return entries_list
-    except KeyError as e:
-        print(e)
+    except KeyError:
         return None
 
 
