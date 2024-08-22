@@ -1,14 +1,18 @@
 from enum import Enum
 from ruamel.yaml import YAML
 from yamcs.pymdb import *
+from pathlib import Path
 
 import sys
 import argparse
 
+DIR_PATH = Path(__file__).resolve().parent
+DATA_DIR_PATH = Path(DIR_PATH,"data")
+
 class Subsystem(Enum):
     EPS = 4
     MAIN = 1
-    ADCS = 1
+    ADCS = 2
     YAMCS = 22
     SRS3 = 21
 
@@ -75,7 +79,7 @@ def create_header(yaml):
     system = System("SCSAT1")
     csp_header = csp.add_csp_header(system, ids=Subsystem)
 
-    with open("mdb/scsat1_header.xml", "wt") as f:
+    with open(Path(DIR_PATH,"scsat1_header.xml"), "wt") as f:
         system.dump(f)
 
 # subsystem header
@@ -144,7 +148,7 @@ def set_telemetry(system,data,base,abstract = False):
     return container
 
 def create_tm(system,yaml, sys_name):
-    yaml_file = f"mdb/data/{sys_name}_tm.yaml"
+    yaml_file = Path(DATA_DIR_PATH, f"{sys_name}_tm.yaml")
     try:
         with open(yaml_file, 'r') as file:
             data = yaml.load(file)
@@ -200,7 +204,7 @@ def set_command(system,csp_header,base,tc_data):
                 )
 
 def create_tc(system,yaml,sys_name):
-    yaml_file = f"mdb/data/{sys_name}_tc.yaml"
+    yaml_file = Path(DATA_DIR_PATH, f"{sys_name}_tc.yaml")
     try:
         with open(yaml_file, 'r') as file:
             tc_data = yaml.load(file)
@@ -236,7 +240,7 @@ def main():
     create_tm(system,yaml,sys_name)
     create_tc(system,yaml,sys_name)
 
-    with open(f"mdb/scsat1_{sys_name}.xml", "wt") as f:
+    with open(Path(DIR_PATH, f"scsat1_{sys_name}.xml"), "wt") as f:
         system.dump(f)
 
 if __name__ == '__main__':

@@ -17,6 +17,7 @@ See https://github.com/yamcs/pymdb
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
           <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="2" label="ADCS"/>
           <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
@@ -44,6 +45,7 @@ See https://github.com/yamcs/pymdb
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
           <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="2" label="ADCS"/>
           <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
@@ -165,6 +167,7 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
           <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="2" label="ADCS"/>
           <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
@@ -174,6 +177,7 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
         <EnumerationList>
           <Enumeration value="4" label="EPS"/>
           <Enumeration value="1" label="MAIN"/>
+          <Enumeration value="2" label="ADCS"/>
           <Enumeration value="22" label="YAMCS"/>
           <Enumeration value="21" label="SRS3"/>
         </EnumerationList>
