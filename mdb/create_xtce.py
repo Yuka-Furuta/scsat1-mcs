@@ -32,6 +32,7 @@ from yamcs.pymdb.expressions import (
     eq
 )
 
+
 DIR_PATH = Path(__file__).resolve().parent
 DATA_DIR_PATH = Path(DIR_PATH, "data")
 
@@ -89,7 +90,6 @@ def set_conditions(cont):
             for cond in condition_data:
                 exp.append(eq(cond["name"], cond["num"], calibrated=True))
             return all_of(*exp)
-
         else:
             for cond in condition_data:
                 exp = eq(cond["name"], cond["num"], calibrated=True)
@@ -101,7 +101,6 @@ def set_conditions(cont):
 def create_header(yaml):
     system = System("SCSAT1")
     csp.add_csp_header(system, ids=Subsystem)
-
     with open(Path(DIR_PATH, "scsat1_header.xml"), "wt") as f:
         system.dump(f)
 
@@ -154,7 +153,6 @@ def set_entries_list(system, cont):
                 )
             else:
                 print("set parameter error: "+param["name"]+"\n")
-
             entries_list.append(ParameterEntry(tm))
         return entries_list
     except KeyError:
@@ -179,9 +177,7 @@ def create_tm(system, yaml, sys_name):
     try:
         with open(yaml_file, 'r') as file:
             data = yaml.load(file)
-
         header_container = create_header_sub(system, data["headers"])
-
         set_telemetry(system, data["containers"], header_container)
     except OSError as e:
         print("Telemetry was not created.")
@@ -236,7 +232,6 @@ def create_tc(system, yaml, sys_name):
         with open(yaml_file, 'r') as file:
             tc_data = yaml.load(file)
         csp_header = csp.add_csp_header(system, ids=Subsystem)
-
         general_command = Command(
             system=system,
             name="MyGeneralCommand",
@@ -257,17 +252,14 @@ def main():
     # option
     args = get_argument()
     if args.data is None:
-        print("Please specify options: --data {srs3,eps,main,adcs}")
+        print("Please specify options: --data {srs3, eps, main, adcs}")
         sys.exit(1)
-
     sys_name = args.data
-
     yaml = YAML()
     system = System(sys_name.upper())
     create_header(yaml)
     create_tm(system, yaml, sys_name)
     create_tc(system, yaml, sys_name)
-
     with open(Path(DIR_PATH, f"scsat1_{sys_name}.xml"), "wt") as f:
         system.dump(f)
 
