@@ -1,4 +1,7 @@
+import sys
+import argparse
 from enum import Enum
+from pathlib import Path
 from ruamel.yaml import YAML
 from yamcs.pymdb import csp
 from yamcs.pymdb.systems import System
@@ -28,10 +31,6 @@ from yamcs.pymdb.expressions import (
     all_of,
     eq
 )
-from pathlib import Path
-
-import sys
-import argparse
 
 DIR_PATH = Path(__file__).resolve().parent
 DATA_DIR_PATH = Path(DIR_PATH, "data")
@@ -46,11 +45,8 @@ class Subsystem(Enum):
 
 
 def get_argument():
-    # オブジェクト生成
     parser = argparse.ArgumentParser()
-    # 引数設定
     parser.add_argument("--data", choices=["srs3", "eps", "main", "adcs"])
-
     return parser.parse_args()
 
 
@@ -197,7 +193,6 @@ def set_command(system, csp_header, base, tc_data):
     for i in tc_data:
         for commands in tc_data[i]:
             for tc in commands["commands"]:
-                # arguments 設定
                 arg_list = []
                 entries_list = []
                 if tc.get("arguments", None) is not None:
@@ -223,7 +218,6 @@ def set_command(system, csp_header, base, tc_data):
                             sys.exit(1)
                         arg_list.append(argument)
                         entries_list.append(ArgumentEntry(argument))
-                # Command 作成
                 Command(
                     system=system,
                     base=base,
