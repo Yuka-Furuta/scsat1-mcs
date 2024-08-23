@@ -11,19 +11,19 @@ DATA_DIR_PATH = Path(DIR_PATH, "alarm")
 
 def get_argument():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", choices=["srs3", "eps", "main", "adcs"])
+    parser.add_argument("--data", help="--data <YAML_FILE>", metavar="YAML_FILE")
     return parser.parse_args()
 
 
-def get_sys_name():
+def get_file_name():
     args = get_argument()
     if args.data is None:
-        print("Please specify options: --data {srs3, eps, main, adcs}")
+        print("Please specify options: --data <YAML_FILE>")
         sys.exit(1)
     return args.data
 
 
-def set_critical(processor, sys_name, alarm_data):
+def set_critical(processor, alarm_data):
     try:
         for alarm in alarm_data["alarms"]:
             alm = alarm.get("critical", None)
@@ -34,21 +34,22 @@ def set_critical(processor, sys_name, alarm_data):
                         critical=(alm["low"], alm["high"])
                     )
                 ]
-                name = alarm["name"]
-                processor.set_alarm_range_sets(parameter=f"/SCSAT1/{sys_name.upper()}/{name}", sets=ranges)
+                processor.set_alarm_range_sets(parameter=alarm_data["prefix"]+alarm["name"], sets=ranges)
     except KeyError:
-        print("'alamrs' is not defined.")
+        print("'alarms' is not defined.")
 
 
 def main():
     client = YamcsClient('localhost:8090')
     processor = client.get_processor(instance='myproject', processor='realtime')
-    sys_name = get_sys_name()
     yaml = YAML()
-    yaml_file = Path(DATA_DIR_PATH, f"{sys_name}_alarm.yaml")
-    with open(yaml_file, 'r') as file:
-        alarm_data = yaml.load(file)
-    set_critical(processor, sys_name, alarm_data)
+    yaml_file = Path(DATA_DIR_PATH, get_file_name())
+    try:
+        with open(yaml_file, 'r') as file:
+            alarm_data = yaml.load(file)
+        set_critical(processor, alarm_data)
+    except OSError as e:
+        print(e)
 
 
 if __name__ == '__main__':

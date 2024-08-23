@@ -1,7 +1,9 @@
+prefix: /SCSAT1/SRS3/
+  
 alarms:
   - name: ping_value
     critical:
-      high: 30
+      high: 40
       low: 10
 
   - name: temp_mcu

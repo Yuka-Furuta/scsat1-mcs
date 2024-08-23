@@ -1,3 +1,5 @@
+prefix: /SCSAT1/EPS/
+
 alarms:
   - name: temperature1 
     critical:

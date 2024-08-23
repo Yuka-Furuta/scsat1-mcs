@@ -1,3 +1,5 @@
+prefix: /SCSAT1/MAIN/
+
 alarms:
   - name: OBC_1_TEMP 
     critical:
