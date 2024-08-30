@@ -2026,7 +2026,16 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
       <IntegerArgumentType name="Ping__ping_value" signed="true" sizeInBits="32">
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerArgumentType>
-      <StringArgumentType name="SHELL_CMD__shell_cmd_str"/>
+      <StringArgumentType name="SHELL_CMD__shell_cmd_str">
+        <StringDataEncoding encoding="US-ASCII">
+          <SizeInBits>
+            <Fixed>
+              <FixedValue>256</FixedValue>
+            </Fixed>
+            <TerminationChar>00</TerminationChar>
+          </SizeInBits>
+        </StringDataEncoding>
+      </StringArgumentType>
       <EnumeratedArgumentType name="csp_message__csp_pri" initialValue="NORMAL">
         <IntegerDataEncoding sizeInBits="2" encoding="unsigned"/>
         <EnumerationList>
@@ -2151,7 +2160,7 @@ packets with HMAC, XTEA encryption, RDP header and CRC32 checksum.
       <MetaCommand name="SHELL_CMD" abstract="false">
         <BaseMetaCommand metaCommandRef="MyGeneralCommand">
           <ArgumentAssignmentList>
-            <ArgumentAssignment argumentName="csp_dport" argumentValue="16"/>
+            <ArgumentAssignment argumentName="csp_dport" argumentValue="10"/>
           </ArgumentAssignmentList>
         </BaseMetaCommand>
         <ArgumentList>

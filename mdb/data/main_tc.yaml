@@ -18,7 +18,7 @@ default_commands:
   - name: main_command
     commands:
       - name: "SHELL_CMD"
-        port: 16
+        port: 10
         arguments:
           - name: shell_cmd_str
             type: string

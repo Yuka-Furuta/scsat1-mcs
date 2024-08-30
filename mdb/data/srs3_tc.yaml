@@ -22,28 +22,28 @@ default_commands:
         arguments:
           - name: command_id
             type: binary
-            num: 0101C8000480
+            val: 0101C8000480
       - name: "SRS-3 TX group data"
         port: 19
         arguments:
           - name: command_id
             type: binary
-            num: 0101C8000180
+            val: 0101C8000180
       - name: "SRS-3 RX group data"
         port: 19 
         arguments:
           - name: command_id
             type: binary
-            num: 0101C8000200
+            val: 0101C8000200
       - name: "SRS-3 boot count"
         port: 19
         arguments:
           - name: command_id
             type: binary
-            num: 0101C800428C
+            val: 0101C800428C
       - name: "SRS-3 WDT count"
         port: 19
         arguments:
           - name: command_id
             type: binary
-            num: 0101C8004290
+            val: 0101C8004290

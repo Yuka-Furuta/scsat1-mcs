@@ -45,12 +45,6 @@ class Subsystem(Enum):
     SRS3 = 21
 
 
-def get_argument():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data", choices=["srs3", "eps", "main", "adcs"])
-    return parser.parse_args()
-
-
 def set_encoding(param, endian):
     param_type = param.get("type", "int")
     if param_type == "int":
@@ -88,11 +82,11 @@ def set_conditions(cont):
         if len(condition_data) > 1:
             exp = []
             for cond in condition_data:
-                exp.append(eq(cond["name"], cond["num"], calibrated=True))
+                exp.append(eq(cond["name"], cond["val"], calibrated=True))
             return all_of(*exp)
         else:
             for cond in condition_data:
-                exp = eq(cond["name"], cond["num"], calibrated=True)
+                exp = eq(cond["name"], cond["val"], calibrated=True)
             return exp
     except KeyError:
         return None
@@ -197,17 +191,19 @@ def set_command(system, csp_header, base, tc_data):
                             argument = IntegerArgument(
                                 name=arguments["name"],
                                 encoding=set_encoding(arguments, tc.get("endian", False)),
-                                default=arguments.get("num", None),
+                                default=arguments.get("val", None),
                             )
                         elif arguments.get("type", "int") == "binary":
                             argument = BinaryArgument(
                                 name=arguments["name"],
                                 encoding=set_encoding(arguments, tc.get("endian", False)),
-                                default=arguments.get("num", None),
+                                default=arguments.get("val", None),
                             )
                         elif arguments.get("type", "int") == "string":
                             argument = StringArgument(
                                 name=arguments["name"],
+                                encoding=set_encoding(arguments, tc.get("endian", False)),
+                                default=arguments.get("val", None),
                             )
                         else:
                             print("Not defined argument type")
@@ -250,11 +246,11 @@ def create_tc(system, yaml, sys_name):
 
 def main():
     # option
-    args = get_argument()
-    if args.data is None:
-        print("Please specify options: --data {srs3, eps, main, adcs}")
-        sys.exit(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data", choices=["srs3", "eps", "main", "adcs"], required=True)
+    args = parser.parse_args()
     sys_name = args.data
+    # create xml
     yaml = YAML()
     system = System(sys_name.upper())
     create_header(yaml)

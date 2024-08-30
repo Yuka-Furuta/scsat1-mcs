@@ -23,22 +23,22 @@ default_commands:
         arguments:
           - name: command_id
             bit: 8
-            num: 0
+            val: 0
           - name: magic_num
-            num: 30868
+            val: 30868
       - name: "HW_RESET"
         port: 15
         endian: true
         arguments:
           - name: command_id
             bit: 8
-            num: 1
+            val: 1
           - name: magic_num
-            num: 17767
+            val: 17767
       - name: "GET_TM"
         port: 7
         endian: true
         arguments:
           - name: command_id
             bit: 8
-            num: 0
+            val: 0

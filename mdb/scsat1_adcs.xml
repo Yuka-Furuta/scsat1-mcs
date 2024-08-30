@@ -527,7 +527,7 @@ See https://github.com/yamcs/pymdb
         <IntegerDataEncoding sizeInBits="16" encoding="unsigned" byteOrder="mostSignificantByteFirst"/>
       </IntegerParameterType>
       <IntegerParameterType name="telemetry_id" signed="false" sizeInBits="32">
-        <IntegerDataEncoding sizeInBits="1" encoding="unsigned"/>
+        <IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
       </IntegerParameterType>
     </ParameterTypeSet>
     <ParameterSet>

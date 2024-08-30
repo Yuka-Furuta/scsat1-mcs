@@ -3,7 +3,7 @@ headers:
     base: "../csp_message"
     conditions:
       - name: "../csp_src"
-        num: MAIN
+        val: MAIN
   - name: "main_container"
     base: "common_container"
     parameters:
@@ -16,14 +16,14 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 1
+        val: 1
     parameters:
       - name: "ping_value"
   - name: Get_amount_free
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 3
+        val: 3
     parameters:
       - name: "amount_free_memory"
         bit: 32
@@ -31,7 +31,7 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 5
+        val: 5
     parameters:
       - name: "amount_memory"
         bit: 32
@@ -39,7 +39,7 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 6
+        val: 6
     parameters:
       - name: "Sysup_time"
         bit: 32
@@ -49,7 +49,7 @@ containers:
     endian: true
     conditions:
       - name: "MAIN/telemetry-id"
-        num: 1    
+        val: 1    
     parameters:
       - name: "TEMP_SEQCOUNT"
         bit: 32
@@ -119,7 +119,7 @@ containers:
     endian: true
     conditions:
       - name: "MAIN/telemetry-id"
-        num: 2
+        val: 2
     parameters:
       - name: "CV_SEQCOUNT"
         bit: 32
@@ -238,7 +238,7 @@ containers:
     endian: true 
     conditions:
       - name: "MAIN/telemetry-id"
-        num: 3
+        val: 3
     parameters:
       - name: "CSP_SEQCOUNT"
         bit: 32
@@ -314,7 +314,7 @@ containers:
     endian: true
     conditions:
       - name: "MAIN/telemetry-id"
-        num: 4
+        val: 4
     parameters:
       - name: "SUNSENS_SEQCOUNT"
         bit: 32
@@ -376,7 +376,7 @@ containers:
     endian: true
     conditions:
       - name: "MAIN/telemetry-id"
-        num: 5
+        val: 5
     parameters:
       - name: "MGNM_SEQCOUNT"
         bit: 32
@@ -428,7 +428,7 @@ containers:
     endian: true 
     conditions:
       - name: "MAIN/telemetry-id"
-        num: 6
+        val: 6
     parameters:
       - name: "DSTRX3_SEQCOUNT"
         bit: 32
@@ -468,7 +468,7 @@ containers:
     endian: true
     conditions:
       - name: "MAIN/telemetry-id"
-        num: 7
+        val: 7
     parameters:
       - name: "HWTEST_RESULT_SEQCOUNT"
         bit: 32

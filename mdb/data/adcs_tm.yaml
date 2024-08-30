@@ -3,12 +3,12 @@ headers:
     base: "../csp_message"
     conditions:
       - name: "../csp_src"
-        num: ADCS
+        val: ADCS
   - name: "adcs_container"
     base: "common_container"
     parameters:
       - name: "telemetry_id"
-        bit: 1
+        bit: 8
 
 containers:
 # csp 共通 reply
@@ -16,14 +16,14 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 1
+        val: 1
     parameters:
       - name: "ping_value"
   - name: Get_amount_free
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 3
+        val: 3
     parameters:
       - name: "amount_free_memory"
         bit: 32
@@ -31,7 +31,7 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 5
+        val: 5
     parameters:
       - name: "amount_memory"
         bit: 32
@@ -39,7 +39,7 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 6
+        val: 6
     parameters:
       - name: "Sysup_time"
         bit: 32
@@ -49,7 +49,7 @@ containers:
     endian: true
     conditions:
       - name: "ADCS/telemetry_id"
-        num: 9
+        val: 9
     parameters:
       - name: "TEMP_SEQCOUNT"
         type: int
@@ -108,7 +108,7 @@ containers:
     endian: true
     conditions:
       - name: "ADCS/telemetry_id"
-        num: 10
+        val: 10
     parameters:
       - name: "CV_SEQCOUNT"
         type: int
@@ -308,7 +308,7 @@ containers:
     endian: true
     conditions:
       - name: "ADCS/telemetry_id"
-        num: 11
+        val: 11
     parameters:
       - name: "IMU_SEQCOUNT"
         type: int
@@ -350,7 +350,7 @@ containers:
     endian: true
     conditions:
       - name: "ADCS/telemetry_id"
-        num: 12
+        val: 12
     parameters:
       - name: "HWMON_SEQCOUNT"
         type: int
@@ -408,7 +408,7 @@ containers:
     endian: true
     conditions:
       - name: "ADCS/telemetry_id"
-        num: 13
+        val: 13
     parameters:
       - name: "BESTPOS_SEQCOUNT"
         type: int
@@ -510,7 +510,7 @@ containers:
     endian: true
     conditions:
       - name: "ADCS/telemetry_id"
-        num: 14
+        val: 14
     parameters:
       - name: "RW_SEQCOUNT"
         type: int
@@ -532,7 +532,7 @@ containers:
     endian: true
     conditions:
       - name: "ADCS/telemetry_id"
-        num: 15
+        val: 15
     parameters:
       - name: "HWTEST_RESULT_SEQCOUNT"
         type: int

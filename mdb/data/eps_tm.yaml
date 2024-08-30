@@ -3,7 +3,7 @@ headers:
     base: "../csp_message"
     conditions:
       - name: "../csp_src"
-        num: EPS
+        val: EPS
   - name: "esp_container"
     base: "common_container"
     parameters:
@@ -23,14 +23,14 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 1
+        val: 1
     parameters:
       - name: "ping_value"
   - name: Get_amount_free
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 3
+        val: 3
     parameters:
       - name: "amount_free_memory"
         bit: 32
@@ -38,7 +38,7 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 5
+        val: 5
     parameters:
       - name: "amount_memory"
         bit: 32
@@ -46,7 +46,7 @@ containers:
     base: "common_container"
     conditions:
       - name: "../csp_sport"
-        num: 6
+        val: 6
     parameters:
       - name: "Sysup_time"
         bit: 32
@@ -56,9 +56,9 @@ containers:
     base: "esp_container"
     conditions:
       - name: "../csp_sport"
-        num: 16
+        val: 16
       - name: "EPS/command_id"
-        num: 0
+        val: 0
     parameters:
       - name: "GWDT_error_code"
         bit: 8
@@ -67,9 +67,9 @@ containers:
     base: "esp_container"
     conditions:
       - name: "../csp_sport"
-        num: 15      
+        val: 15      
       - name: "EPS/command_id"
-        num: 1
+        val: 1
     parameters:
       - name: "HW_status"
         bit: 8
@@ -80,9 +80,9 @@ containers:
     endian: true
     conditions:
       - name: "../csp_sport"
-        num: 7
+        val: 7
       - name: "EPS/command_id"
-        num: 0
+        val: 0
     parameters:
       - name: "status"
         bit: 8
