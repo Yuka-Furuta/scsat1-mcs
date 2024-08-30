@@ -1,53 +1,53 @@
-import sys
 import argparse
 from pathlib import Path
 from ruamel.yaml import YAML
 from yamcs.client import YamcsClient
 from yamcs.tmtc.model import RangeSet
 
-DIR_PATH = Path(__file__).resolve().parent
-DATA_DIR_PATH = Path(DIR_PATH, "alarm")
+
+def set_range(level, alarm):
+    alm = alarm.get(level, None)
+    if alm is not None:
+        return (alm.get("low", None), alm.get("high", None))
+    else:
+        return None
 
 
-def get_argument():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data", help="--data <YAML_FILE>", metavar="YAML_FILE")
-    return parser.parse_args()
-
-
-def get_file_name():
-    args = get_argument()
-    if args.data is None:
-        print("Please specify options: --data <YAML_FILE>")
-        sys.exit(1)
-    return args.data
-
-
-def set_critical(processor, alarm_data):
+def set_alarm(processor, alarm_data):
     try:
         for alarm in alarm_data["alarms"]:
-            alm = alarm.get("critical", None)
-            if alm is not None:
+            if alarm is not None:
                 ranges = [
                     RangeSet(
                         context=None,
-                        critical=(alm["low"], alm["high"])
+                        watch=set_range("watch", alarm),
+                        warning=set_range("warning", alarm),
+                        distress=set_range("distress", alarm),
+                        critical=set_range("critical", alarm),
+                        severe=set_range("severe", alarm),
+                        min_violations=alarm.get("min_violations", 1)
                     )
                 ]
                 processor.set_alarm_range_sets(parameter=alarm_data["prefix"]+alarm["name"], sets=ranges)
     except KeyError:
-        print("'alarms' is not defined.")
+        print("'alarms' is not correctly defined.")
 
 
 def main():
+    # argument
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data", metavar="YAML_FILE", help='Path of yaml file for alarm', required=True)
+    parser.add_argument("--instance", metavar="INSTANCE_NAME", default="scsat1", help='instance name (default: sccat1)')
+    args = parser.parse_args()
+    # set alarm
     client = YamcsClient('localhost:8090')
-    processor = client.get_processor(instance='myproject', processor='realtime')
+    processor = client.get_processor(instance=args.instance, processor='realtime')
     yaml = YAML()
-    yaml_file = Path(DATA_DIR_PATH, get_file_name())
+    yaml_file = Path(args.data)
     try:
         with open(yaml_file, 'r') as file:
             alarm_data = yaml.load(file)
-        set_critical(processor, alarm_data)
+        set_alarm(processor, alarm_data)
     except OSError as e:
         print(e)
 
