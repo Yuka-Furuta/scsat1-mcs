@@ -1,0 +1,47 @@
+
+#+title: SC-Sat1 MCS and Grafana with Docker
+This directory contains all the necessary files to run SC-Sat1 MCS and Grafana in Docker containers.
+* Features
+    * Build and run Docker containers for SC-Sat1 MCS and Grafana.
+    * Start the server to access SC-Sat1 MCS and Grafana.
+* Getting Started
+    * Build and Run the Containers
+    To create and start the containers for SC-Sat1 MCS and Grafana, run the following command:
+    #+begin_example
+    docker-compose up -d
+    #+end_example
+
+    * Accessing the Services
+        * SC-Sat1 MCS: [[http://127.0.0.3:8090/]]
+
+        * Grafana: [[http://127.0.0.3:3000/]]
+
+* Container operations
+    * Stopping and Removing the Containers
+    To stop and completely remove the containers,, run the following command:
+    #+begin_example
+    docker-compose stop
+    #+end_example
+
+    * Stopping and Removing the Containers
+    To stop and completely remove the containers, run the following command:
+    #+begin_example
+    docker-compose down
+    #+end_example
+
+    * Stopping Individual Services
+    To stop SC-Sat1 MCS only:
+    #+begin_example
+    docker stop yamcs
+    #+end_example
+
+    * To stop Grafana only:
+    #+begin_example
+    docker stop grafana
+    #+end_example
+
+* Configuring Host Access
+To specify the IP address used for host access, update the [[docker/.env][.env]] file with your desired IP address:
+#+begin_example
+MY_IP={Your_IP_Address}
+#+end_example
