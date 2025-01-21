@@ -1,0 +1,16 @@
+# FROM debian
+FROM python:latest
+# Install
+RUN apt-get update&& apt-get install -y \
+    nano \
+    systemd \
+    alien \
+    openjdk-17-jdk
+
+# Yamcs Download
+RUN wget https://github.com/yamcs/yamcs/releases/download/yamcs-5.9.3/yamcs-5.9.3-1.x86_64.rpm \
+    && alien --script -d -k yamcs-5.9.3-1.x86_64.rpm
+
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+ENTRYPOINT ./entrypoint.sh

@@ -1,0 +1,5 @@
+FROM grafana/grafana
+
+WORKDIR /var/lib/grafana/plugins
+RUN wget https://github.com/yamcs/grafana-yamcs/releases/download/v2.2.2/yamcs-yamcs-datasource-2.2.2.zip
+RUN unzip yamcs-yamcs-datasource-2.2.2.zip && rm yamcs-yamcs-datasource-2.2.2.zip
