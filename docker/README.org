@@ -11,6 +11,12 @@ This directory contains all the necessary files to run SC-Sat1 MCS and Grafana i
     docker-compose up -d
     #+end_example
 
+    * Running with Persistent Data
+    If you want to enable data persistence, run the following command:
+    #+begin_example
+    docker-compose -f compose.yaml -f compose.override.yaml up -d
+    #+end_example
+
     * Accessing the Services
         * SC-Sat1 MCS: [[http://127.0.0.3:8090/]]
 
@@ -35,13 +41,23 @@ This directory contains all the necessary files to run SC-Sat1 MCS and Grafana i
     docker stop yamcs
     #+end_example
 
-    * To stop Grafana only:
+    To stop Grafana only:
     #+begin_example
     docker stop grafana
     #+end_example
 
-* Configuring Host Access
-To specify the IP address used for host access, update the [[docker/.env][.env]] file with your desired IP address:
-#+begin_example
-MY_IP={Your_IP_Address}
-#+end_example
+* Configuration Options
+Additional configurations can be customized in the [[docker/.env][.env]]
+    * Host Access IP:
+    #+begin_example
+    MY_IP={YOUR_IP_ADDRESS}
+    #+end_example
+    * Yamcs Version:
+    #+begin_example
+    YAMCS_URL={RPMFILE_URL}
+    YAMCS_VERSION={VERSION_NUMBER}
+    #+end_example
+    * OpenJDK Version:
+    #+begin_example
+    OPENJDK_VERSION={OPENJDK_VERSION}
+    #+end_example

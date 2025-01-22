@@ -1,5 +1,5 @@
 #/bin/sh -e
-dpkg -i yamcs_5.9.3-1_amd64.deb
+dpkg -i yamcs_${YAMCS_VERSION}_amd64.deb
 set -e
 
 mkdir -p ~/yamcs_work

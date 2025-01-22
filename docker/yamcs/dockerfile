@@ -1,16 +1,21 @@
 # FROM debian
 FROM python:latest
-# Install
+ARG OPENJDK_VERSION
+
+ARG YAMCS_URL
+ARG YAMCS_VERSION
+
 RUN apt-get update&& apt-get install -y \
     nano \
     systemd \
     alien \
-    openjdk-17-jdk
+    ${OPENJDK_VERSION}
 
 # Yamcs Download
-RUN wget https://github.com/yamcs/yamcs/releases/download/yamcs-5.9.3/yamcs-5.9.3-1.x86_64.rpm \
-    && alien --script -d -k yamcs-5.9.3-1.x86_64.rpm
+RUN wget -O yamcs_install.x86_64.rpm ${YAMCS_URL} \
+    && alien --script -d -k yamcs_install.x86_64.rpm \
+    && rm yamcs_install.x86_64.rpm
 
-COPY entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
-ENTRYPOINT ./entrypoint.sh
+COPY mcs_install.sh ./mcs_install.sh
+RUN chmod +x ./mcs_install.sh
+ENTRYPOINT ./mcs_install.sh

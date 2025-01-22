@@ -1,0 +1,10 @@
+services:
+  yamcs:
+    volumes:
+      - 'yamcs_storage:/root/yamcs_work/storage'
+  grafana:
+    volumes:
+      - 'grafana_storage:/var/lib/grafana'
+volumes:
+  yamcs_storage: {}
+  grafana_storage: {}
