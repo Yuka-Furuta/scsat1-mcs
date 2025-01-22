@@ -1,8 +1,6 @@
 # FROM debian
 FROM python:latest
 ARG OPENJDK_VERSION
-
-ARG YAMCS_URL
 ARG YAMCS_VERSION
 
 RUN apt-get update&& apt-get install -y \
@@ -12,7 +10,7 @@ RUN apt-get update&& apt-get install -y \
     ${OPENJDK_VERSION}
 
 # Yamcs Download
-RUN wget -O yamcs_install.x86_64.rpm ${YAMCS_URL} \
+RUN wget -O yamcs_install.x86_64.rpm https://github.com/yamcs/yamcs/releases/download/yamcs-${YAMCS_VERSION%-*}/yamcs-${YAMCS_VERSION}.x86_64.rpm \
     && alien --script -d -k yamcs_install.x86_64.rpm \
     && rm yamcs_install.x86_64.rpm
 

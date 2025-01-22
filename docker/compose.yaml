@@ -6,7 +6,7 @@ services:
       dockerfile: yamcs/dockerfile
       args:
         OPENJDK_VERSION: ${OPENJDK_VERSION}
-        YAMCS_URL: ${YAMCS_URL}
+        YAMCS_VERSION: ${YAMCS_VERSION}
     ports:
       - '${MY_IP}:8090:8090'
     environment:

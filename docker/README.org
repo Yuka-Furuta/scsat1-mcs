@@ -54,7 +54,6 @@ Additional configurations can be customized in the [[docker/.env][.env]]
     #+end_example
     * Yamcs Version:
     #+begin_example
-    YAMCS_URL={RPMFILE_URL}
     YAMCS_VERSION={VERSION_NUMBER}
     #+end_example
     * OpenJDK Version:
