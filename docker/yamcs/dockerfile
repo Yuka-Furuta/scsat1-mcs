@@ -14,6 +14,6 @@ RUN wget -O yamcs_install.x86_64.rpm https://github.com/yamcs/yamcs/releases/dow
     && alien --script -d -k yamcs_install.x86_64.rpm \
     && rm yamcs_install.x86_64.rpm
 
-COPY mcs_install.sh ./mcs_install.sh
+COPY ./yamcs/mcs_install.sh ./mcs_install.sh
 RUN chmod +x ./mcs_install.sh
 ENTRYPOINT ./mcs_install.sh

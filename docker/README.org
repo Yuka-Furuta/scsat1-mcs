@@ -5,6 +5,7 @@ This directory contains all the necessary files to run SC-Sat1 MCS and Grafana i
     * Build and run Docker containers for SC-Sat1 MCS and Grafana.
     * Start the server to access SC-Sat1 MCS and Grafana.
 * Getting Started
+** Starting Docker
     * Build and Run the Containers
     To create and start the containers for SC-Sat1 MCS and Grafana, run the following command:
     #+begin_example
@@ -22,6 +23,26 @@ This directory contains all the necessary files to run SC-Sat1 MCS and Grafana i
 
         * Grafana: [[http://127.0.0.3:3000/]]
 
+** Grafana Setup
+    * First Time Setup
+    Create service account, generate token, and configure datasource for Yamcs
+    #+begin_example
+    docker exec -it grafana bash
+    source setup.sh
+    #+end_example
+
+    * JSON Import
+    Read a JSON file to create dashboards and folders in Grafana
+    #+begin_example
+    bash import.sh <JSON_FILE>
+    #+end_example
+    
+    * Subsequent Runs
+    Use the preconfigured service account and token.
+    #+begin_example
+    source .grafana_profile 
+    #+end_example
+    
 * Container operations
     * Stopping and Removing the Containers
     To stop and completely remove the containers,, run the following command:
@@ -59,4 +80,8 @@ Additional configurations can be customized in the [[docker/.env][.env]]
     * OpenJDK Version:
     #+begin_example
     OPENJDK_VERSION={OPENJDK_VERSION}
+    #+end_example
+    * JQ Version:
+    #+begin_example
+    JQ_VERSION={JQ_VERSION}
     #+end_example
