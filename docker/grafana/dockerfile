@@ -10,4 +10,4 @@ RUN unzip yamcs-yamcs-datasource-2.2.2.zip && rm yamcs-yamcs-datasource-2.2.2.zi
 WORKDIR /home/grafana
 COPY ./grafana/setup.sh ./setup.sh
 COPY ./grafana/import.sh ./import.sh
-COPY ./grafana/my_dashboard.json my_dashboard.json
+COPY ./grafana/scsat1_ini.json scsat1_ini.json

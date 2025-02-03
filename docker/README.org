@@ -1,87 +1,103 @@
 
-#+title: SC-Sat1 MCS and Grafana with Docker
+#+title: SC-Sat1 MCS/Grafana Setup Guide in Docker
 This directory contains all the necessary files to run SC-Sat1 MCS and Grafana in Docker containers.
+This README provides instructions to set up a Yamcs and Grafana environment using Docker.
+
 * Features
-    * Build and run Docker containers for SC-Sat1 MCS and Grafana.
-    * Start the server to access SC-Sat1 MCS and Grafana.
+    Builds and executes Docker containers for SC-Sat1 MCS and Grafana.
+    When executed, the SC-Sat1 MCS and Grafana servers will be started respectively.
+    Grafana can retrieve data from SC-Sat1 MCS by executing the setup described below.
+
+* Prerequisites
+    Before proceeding with the setup, ensure that the following software is installed:
+    * Docker
+    * Docker Compose
+
 * Getting Started
-** Starting Docker
-    * Build and Run the Containers
-    To create and start the containers for SC-Sat1 MCS and Grafana, run the following command:
-    #+begin_example
-    docker-compose up -d
-    #+end_example
+** Configure the [[docker/.env][.env]] File
+    * Set the admin username and the initial password of Grafana.
+        
+        If not set, both default to admin.
+        #+begin_example
+        GF_SECURITY_ADMIN_USER="<your admin username>"
+        GF_SECURITY_ADMIN_PASSWORD="<your admin password>"
+        #+end_example
 
-    * Running with Persistent Data
-    If you want to enable data persistence, run the following command:
-    #+begin_example
-    docker-compose -f compose.yaml -f compose.override.yaml up -d
-    #+end_example
+    * You can modify the following variables as needed:
+        #+begin_example
+        MY_IP=<your IP address>
+        YAMCS_VERSION=<Yamcs version number>
+        OPENJDK_VERSION=<OpenJDK version>
+        JQ_VERSION=<JQ version>
+        #+end_example
 
-    * Accessing the Services
-        * SC-Sat1 MCS: [[http://127.0.0.3:8090/]]
 
-        * Grafana: [[http://127.0.0.3:3000/]]
+** Start Docker Containers
+    * To create and start the containers for SC-Sat1 MCS and Grafana, run the following command:
+        #+begin_example
+        docker-compose up -d
+        #+end_example
+
+    * If you want to enable data persistence, run the following command:
+        #+begin_example
+        docker-compose -f compose.yaml -f compose.override.yaml up -d
+        #+end_example
 
 ** Grafana Setup
-    * First Time Setup
-    Create service account, generate token, and configure datasource for Yamcs
-    #+begin_example
-    docker exec -it grafana bash
-    source setup.sh
-    #+end_example
+    * Run the following command to enter the running grafana container
+        #+begin_example
+        docker exec -it grafana bash
+        #+end_example
+    * First Time Setup (Run inside the container)
 
-    * JSON Import
-    Read a JSON file to create dashboards and folders in Grafana
-    #+begin_example
-    bash import.sh <JSON_FILE>
-    #+end_example
+      Set up the API used to manipulate Grafana and add a data source for yamcs to Grafana
+        #+begin_example
+        source setup.sh
+        #+end_example
+
+    * Read a JSON file to create dashboards and folders for scsat1 in Grafana (Run inside the container)
+        #+begin_example
+        bash import.sh
+        #+end_example
     
-    * Subsequent Runs
-    Use the preconfigured service account and token.
-    #+begin_example
-    source .grafana_profile 
-    #+end_example
+    * Subsequent Runs (Run inside the container)
+
+        If you detached the container after setup and re-entered it, 
+        execute the following command inside the container.
+        You can use pre configured service account and token.
+        #+begin_example
+        source .grafana_profile 
+        #+end_example
+
+
+* Accessing the Services
+    * SC-Sat1 MCS: [[http://127.0.0.3:8090/]]
+    * Grafana: [[http://127.0.0.3:3000/]]
     
 * Container operations
     * Stopping and Removing the Containers
-    To stop and completely remove the containers,, run the following command:
-    #+begin_example
-    docker-compose stop
-    #+end_example
+
+        To stop and completely remove the containers,, run the following command:
+        #+begin_example
+        docker-compose stop
+        #+end_example
 
     * Stopping and Removing the Containers
-    To stop and completely remove the containers, run the following command:
-    #+begin_example
-    docker-compose down
-    #+end_example
+
+        To stop and completely remove the containers, run the following command:
+        #+begin_example
+        docker-compose down
+        #+end_example
 
     * Stopping Individual Services
-    To stop SC-Sat1 MCS only:
-    #+begin_example
-    docker stop yamcs
-    #+end_example
 
-    To stop Grafana only:
-    #+begin_example
-    docker stop grafana
-    #+end_example
+        To stop SC-Sat1 MCS only:
+        #+begin_example
+        docker stop yamcs
+        #+end_example
+   
+        To stop Grafana only:
+        #+begin_example
+        docker stop grafana
+        #+end_example
 
-* Configuration Options
-Additional configurations can be customized in the [[docker/.env][.env]]
-    * Host Access IP:
-    #+begin_example
-    MY_IP={YOUR_IP_ADDRESS}
-    #+end_example
-    * Yamcs Version:
-    #+begin_example
-    YAMCS_VERSION={VERSION_NUMBER}
-    #+end_example
-    * OpenJDK Version:
-    #+begin_example
-    OPENJDK_VERSION={OPENJDK_VERSION}
-    #+end_example
-    * JQ Version:
-    #+begin_example
-    JQ_VERSION={JQ_VERSION}
-    #+end_example
