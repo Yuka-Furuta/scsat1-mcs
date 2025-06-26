@@ -543,21 +543,9 @@ public class Scsat1Service extends AbstractYamcsService
 
     @Override
     public void onTuple(Stream stream, Tuple tuple) {
-        CfdpPacket packet;
-        try {
-            packet = CfdpPacket.fromTuple(tuple);
-            if (packet == null) {// not supported PDU, ignored
-                return;
-            }
-        } catch (PduDecodingException e) {
-            log.warn("Error decoding PDU: {}, packet: {}", e.toString(),
-                    StringConverter.arrayToHexString(e.getData(), true));
-            eventProducer.sendWarning(ETYPE_PDU_DECODING_ERROR, "Error decoding CFDP PDU; " + e.getMessage());
-            return;
-        } catch (Exception e) {
-            log.error("Unexpected error decoding pdu tuple", e);
-            return;
-        }
+        // 受信CFDPパケットはすべて無視する
+        log.warn("Received CFDP packet but this instance is send-only; ignoring packet");
+        return;
     }
 
     @Override
@@ -650,14 +638,8 @@ public class Scsat1Service extends AbstractYamcsService
                         pendingAfterCompletion, TimeUnit.MILLISECONDS);
 
                 if (cfdpTransfer instanceof CfdpIncomingTransfer) {
-                    CfdpIncomingTransfer incomingTransfer = (CfdpIncomingTransfer) cfdpTransfer;
-                    CfdpTransactionId originatingTransactionId = incomingTransfer.getOriginatingTransactionId();
-                    if (originatingTransactionId != null) {
-                        List<String> request = directoryListingRequests.remove(originatingTransactionId);
-                        if (request != null || incomingTransfer.getDirectoryListingResponse() != null) {
-                            processDirectoryListingResponse(incomingTransfer, request);
-                        }
-                    }
+                    // This file transfer service cannot receive remote files.
+                    log.debug("This file transfer service cannot receive remote file");
                 }
             }
             executor.submit(this::tryStartQueuedTransfer);
@@ -747,8 +729,7 @@ public class Scsat1Service extends AbstractYamcsService
     }
 
 
-    // 手法がなさそうだから一旦全部エラーに
-    // startDownload, fetchFileList
+    // Download and file listing are not supported; raise an error.
     @Override
     public FileTransfer startDownload(String sourceEntity, String sourcePath, String destinationEntity, Bucket bucket,
             String objectName, TransferOptions options) throws InvalidRequestException {
@@ -763,98 +744,13 @@ public class Scsat1Service extends AbstractYamcsService
     @Override
     public ListFilesResponse getFileList(String source, String destination, String remotePath,
             Map<String, Object> options) {
-        EntityConf sourceEntity = getEntityFromName(source, localEntities);
-        EntityConf destinationEntity = getEntityFromName(destination, remoteEntities);
-
-        if (fileListingService != this) {
-            return fileListingService.getFileList(sourceEntity.getName(), destinationEntity.getName(), remotePath,
-                    options);
-        }
-
-        String dirPath = remotePath.replaceFirst("/*$", "");
-        if (automaticDirectoryListingReloads && directoryListingRequests.values().stream()
-                .noneMatch(request -> request.equals(Arrays.asList(destinationEntity.getName(), dirPath)))) {
-            fetchFileList(sourceEntity.getName(), destinationEntity.getName(), dirPath, options);
-        }
-
-        try {
-            YarchDatabaseInstance ydb = YarchDatabase.getInstance(yamcsInstance);
-            StreamSqlResult res = ydb.execute("select * from " + FILELIST_TABLE_NAME + " where " + COL_DESTINATION
-                    + "=? and " + COL_REMOTE_PATH + "=? ORDER DESC LIMIT 1", destinationEntity.getName(), dirPath);
-            if (res.hasNext()) {
-                ListFilesResponse response = res.next().getColumn(COL_LIST_FILES_RESPONSE);
-                res.close();
-                return response;
-            } else {
-                res.close();
-                log.info("No saved file lists found for destination: " + destination + " and remote path: "
-                        + remotePath);
-            }
-        } catch (Exception e) {
-            log.error("Failed to query database for previous file listings", e);
-        }
-
+        // Remote file listing is not enabled for this file transfer service
         return null;
-    }
-
-    private void processDirectoryListingResponse(CfdpIncomingTransfer incomingTransfer, List<String> request) {
-        if (incomingTransfer.getTransferState() != TransferState.COMPLETED) {
-            return;
-        }
-        if (request == null) {
-            eventProducer.sendWarning(
-                    "Received CFDP Directory Listing Response but with no matching Directory Listing Request");
-            return;
-        }
-
-        if (incomingTransfer.getDirectoryListingResponse().getListingResponseCode() != ListingResponseCode.SUCCESSFUL) {
-            eventProducer.sendWarning("Directory Listing Response was "
-                    + incomingTransfer.getDirectoryListingResponse().getListingResponseCode() + ". Associated request: "
-                    + request);
-            return;
-        }
-
-        EntityConf remoteEntity = remoteEntities.values().stream()
-                .filter(entity -> entity.id == incomingTransfer.cfdpTransactionId.getInitiatorEntity()).findFirst()
-                .orElse(null);
-        if (remoteEntity == null) {
-            eventProducer.sendWarning("Directory Listing Response coming from an unknown remote entity: id="
-                    + incomingTransfer.cfdpTransactionId.getInitiatorEntity());
-            return;
-        }
-
-        String remotePath = request.get(1);
-
-        List<RemoteFile> files = fileListingParser.parse(remotePath, incomingTransfer.getFileData());
-
-        ListFilesResponse listFilesResponse = ListFilesResponse.newBuilder()
-                .addAllFiles(files)
-                .setDestination(request.get(0))
-                .setRemotePath(remotePath)
-                .setListTime(TimeEncoding.toProtobufTimestamp(incomingTransfer.getStartTime()))
-                .build();
-
-        saveFileList(listFilesResponse);
-
-        log.debug("Notifying {} file list listeners with {} files for destination={} path={}",
-                fileListingService.getRemoteFileListMonitors().size(), files.size(), remoteEntity.getName(),
-                remotePath);
-        notifyRemoteFileListMonitors(listFilesResponse);
     }
 
     @Override
     public void saveFileList(ListFilesResponse listFilesResponse) {
-        if (fileListingService != this) {
-            fileListingService.saveFileList(listFilesResponse);
-            return;
-        }
-        Tuple t = new Tuple();
-        t.addTimestampColumn(COL_LIST_TIME, TimeEncoding.fromProtobufTimestamp(listFilesResponse.getListTime()));
-        t.addColumn(COL_DESTINATION, listFilesResponse.getDestination());
-        t.addColumn(COL_REMOTE_PATH, listFilesResponse.getRemotePath());
-        t.addColumn(COL_LIST_FILES_RESPONSE, DataType.protobuf("org.yamcs.protobuf.ListFilesResponse"),
-                listFilesResponse);
-        fileListStream.emitTuple(t);
+        // Saving Remote file list is not enabled for this file transfer service
     }
 
     private EntityConf getEntityFromName(String entityName, Map<String, EntityConf> entities) {
@@ -952,7 +848,6 @@ public class Scsat1Service extends AbstractYamcsService
                 .setAssociatedText("Reliable")
                 .setDefault("true")
                 .build());
-
         return options;
     }
 

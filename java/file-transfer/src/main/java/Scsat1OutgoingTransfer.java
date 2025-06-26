@@ -20,7 +20,6 @@ import org.yamcs.protobuf.TransferState;
 import org.yamcs.yarch.Bucket;
 import org.yamcs.yarch.Stream;
 
-// テスト
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -33,7 +32,6 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
-    // テスト
     protected DatagramSocket socket;
     protected int port;
     protected String host;
@@ -43,14 +41,15 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
     private int sessionId = 0;
     private byte[] fileSendPacket;
     private int fileSendPacketLength;
-    private final int sendDataMaxSize = 200;
     private int offset;
     private int remainSize;
-
+    private final int sendDataMaxSize = 200;
     private static final String STORAGE_NAME = "/storage/";
     private static final int CMD_OPEN = 2;
     private static final int CMD_DATA = 3;
     private static final int CMD_CLOSE = 4;
+    private static int seqNrSize = 4;
+    private static int fileNameLength = 64;
 
     private enum OutTxState {
         /**
@@ -86,42 +85,6 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
     boolean eofSent = false;
     ConditionCode reasonForCancellation;
 
-    /**
-     * Create a new CFDP outgoing (uplink) transfer.
-     * <p>
-     * The transfer has to be started with the {@link #start()} method.
-     *
-     * @param yamcsInstance
-     *            - yamcsInstance where this transfer is running. It is used for log configuration and to get the time
-     *            service.
-     * @param initiatorEntityId
-     * @param id
-     *            - unique identifier. The least significant number of bits (according to the CFDP sequence length) of
-     *            this id will be used to make the CFDP transaction id.
-     * @param creationTime
-     *            - time when the transaction has been created
-     * @param executor
-     *            - the CFDP state machine is serialized in this executor. It is also used to schedule timeouts.
-     * @param request
-     *            - the request containing the file to be sent.
-     * @param cfdpOut
-     *            - the stream where the outgoing PDUs are placed.
-     * @param config
-     *            - the configuration of various settings (see yamcs manual)
-     * @param bucket
-     *            - bucket from/to which the file should be
-     * @param customPduSize
-     *            - if not null, size to overwrite the config maxPduSize
-     * @param customPduDelay
-     *            - if not null, delay to overwrite the config sleepBetweenPdus
-     * @param eventProducer
-     *            - used to send events when important things happen
-     * @param monitor
-     *            - will be notified when transaction status changes
-     * @param faultHandlerActions
-     *            - can be used to change behaviour in case of timeouts or failures. Can be null, in which case the
-     *            default behaviour to cancel the transaction will be used.
-     */
     public Scsat1OutgoingTransfer(String yamcsInstance, long initiatorEntityId, long id, long creationTime,
             ScheduledThreadPoolExecutor executor,
             PutRequest request, Stream cfdpOut, YConfiguration config, Bucket bucket,
@@ -143,10 +106,7 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
     }
 
     private static CfdpTransactionId makeTransactionId(long sourceId, YConfiguration config, long id) {
-        // makeTransactionIdは必要なので固定値にした
-        int seqNrSize = 4;
         long seqNum = id & ((1l << seqNrSize * 8) - 1);
-
         return new CfdpTransactionId(sourceId, seqNum);
     }
 
@@ -154,7 +114,7 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
      * Start the transfer
      */
     public void start() {
-        // socketの設定をする
+        // Configure the socket
         try {
             setUdpSender();
         } catch (SocketException | UnknownHostException e) {
@@ -171,7 +131,6 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         try {
             switch (outTxState) {
                 case START:
-                    System.out.println("Start!!!!");
                     uploadOpenCmd();
                     offset = 0;
                     remainSize = request.getFileLength();
@@ -179,12 +138,10 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
                     monitor.stateChanged(this);
                     break;
                 case SENDING_DATA:
-                    System.out.println("Sending!!!!");
                     uploadDataCmd();
                     monitor.stateChanged(this);
                     break;
                 case COMPLETED:
-                    System.out.println("Fin!!!!");
                     pduSendingSchedule.cancel(true);
                     cancelInactivityTimer();
                     break;
@@ -197,7 +154,7 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         }
     }
 
-    // ByteArray変換系
+    // Concatenate ByteArrays
     public byte[] concat(byte[] a, byte[] b) {
         byte[] result = new byte[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
@@ -206,8 +163,10 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
     }
 
     public byte[] fileSendPacketHeader(int commandId, int sessionId) {
-        // 1バイト: commandId, 2バイト: sessionId, sessionId は little-endian
-        ByteBuffer buffer = ByteBuffer.allocate(1 + 2);
+        //  1 byte: commandId, 2 bytes: sessionId (little-endian)
+        int commandIdSize = 1;
+        int sessionIdSize = 2;
+        ByteBuffer buffer = ByteBuffer.allocate(commandIdSize + sessionIdSize);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.put((byte) commandId);
         buffer.putShort((short) sessionId);
@@ -215,65 +174,69 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
     }
 
     public byte[] fileName2ByteArray(String fileName) {
-        ByteBuffer buffer = ByteBuffer.allocate(64);
+        ByteBuffer buffer = ByteBuffer.allocate(fileNameLength);
         byte[] fileNameBytes = fileName.getBytes(StandardCharsets.UTF_8);
-        if (fileNameBytes.length > 64) {
-            throw new IllegalArgumentException("fileName toofileSendPacketLength long (max 64 bytes in UTF-8)");
+        if (fileNameBytes.length > fileNameLength) {
+            throw new IllegalArgumentException("fileName toofileSendPacketLength long (max" + fileNameLength + "bytes in UTF-8)");
         }
         buffer.put(fileNameBytes);
-        buffer.put(new byte[64 - fileNameBytes.length]); // ゼロ埋め
+        // Filename is fixed, so pad with zeros
+        buffer.put(new byte[fileNameLength - fileNameBytes.length]);
         return buffer.array();
     }
 
     public byte[] fileData2ByteArray(int offset, int sendFileSize, byte[] fileData) {
-        // offset (4バイト), sendFileSize (4バイト), fileData（200byte）
-        ByteBuffer buffer = ByteBuffer.allocate(4 + 4 + 200); // 必要なバイト数を確保
-        int fileDataLength = Math.min(fileData.length, 200); // fileDataの長さが200を超えないようにする
-        buffer.order(ByteOrder.LITTLE_ENDIAN); // リトルエンディアン
+        // Allocate the required number of bytes
+        int offsetSize = 4;
+        int fileSizeLength = 4;
+        ByteBuffer buffer = ByteBuffer.allocate(offsetSize + fileSizeLength + sendDataMaxSize);
+        // Ensure fileData length does not exceed the maximum
+        int fileDataLength = Math.min(fileData.length, sendDataMaxSize);
+        // Little-endian
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.putInt(offset);
         buffer.putInt(sendFileSize);
         buffer.put(fileData, 0, fileDataLength);
-        // 足りない分はゼロで埋める
-        if (fileDataLength < 200) {
-            buffer.put(new byte[200 - fileDataLength]); // ゼロ埋め
+        //  Pad missing bytes with zeros for transmission
+        if (fileDataLength < sendDataMaxSize) {
+            buffer.put(new byte[sendDataMaxSize - fileDataLength]);
         }
         return buffer.array();
     }
 
-    // socket,addressの設定
+    // Setup socket and address
     public void setUdpSender() throws SocketException, UnknownHostException {
         socket = new DatagramSocket();
         address = InetAddress.getByName(host);
     }
 
-    // テスト用　消す
-    public static void printHex(byte[] data) {
-        for (byte b : data) {
-            System.out.printf("%02X ", b); // 2桁の16進数、先頭にゼロ埋め
-        }
-        System.out.println();
-    }
+    // public static void printHex(byte[] data) {
+    //     for (byte b : data) {
+    //         System.out.printf("%02X ", b); // 2桁の16進数、先頭にゼロ埋め
+    //     }
+    //     System.out.println();
+    // }
 
 
     public void sendFileCommand(byte[] data) throws IOException {
-        ByteBuffer buf = ByteBuffer.allocate(4 + data.length);
+        int headerSize = 4;
+        ByteBuffer buf = ByteBuffer.allocate(headerSize + data.length);
         cspFilePacket = new CspPacket(buf);
         int filePriority = 2;
         byte src = (byte) cfdpTransactionId.getInitiatorEntity();
         byte dst = (byte) request.getDestinationCfdpEntityId();
         int fileDport = 13;
         cspFilePacket.setHeader((byte)filePriority, src, dst, (byte)fileDport, (byte)32);
-        // 4. ヘッダの後ろにデータを書き込む
-        buf.position(4);
+        // Write data after the header
+        buf.position(headerSize);
         buf.put(data);
         fileSendPacket = cspFilePacket.getBytes();
         fileSendPacketLength = cspFilePacket.getLength();
-        printHex(fileSendPacket);
         DatagramPacket packet = new DatagramPacket(fileSendPacket, fileSendPacketLength, address, port);
         socket.send(packet);
     }
 
-    // Command送信シリーズ
+    // Series of command transmissions
     public void uploadOpenCmd()  throws IOException {
         String fileName = STORAGE_NAME + request.getDestinationFileName();
         byte[] openFileHeader = fileSendPacketHeader(CMD_OPEN, sessionId);
@@ -290,7 +253,7 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         byte[] uploadFileHeader = fileSendPacketHeader(CMD_DATA, sessionId);
         if(remainSize == 0){
             if (offset % sendDataMaxSize == 0){
-                // 全部キレイに送れてしまったとき？終了通知
+                // Send completion notification when exactly sent
                 offset = 0;
                 sendFileSize = 0;
                 fileDataChunk = new byte[0];
@@ -305,9 +268,9 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
             } else {
                 sendFileSize = sendDataMaxSize;
             }
-            // 塊データchunk をsize分読み込む
+            // Read chunk data of given size
             fileDataChunk = Arrays.copyOfRange(request.getFileData(), offset, offset + sendFileSize);
-            // 送る
+            // Send a packet
             uploadFileData = fileData2ByteArray(offset, sendFileSize, fileDataChunk);
             sendData = concat(uploadFileHeader, uploadFileData);
             sendFileCommand(sendData);
@@ -394,11 +357,9 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
             return;
         }
         outTxState = OutTxState.COMPLETED;
-        // 転送開始からの経過時間を秒単位で算出。
+        // Calculate elapsed time since transfer start in seconds
         long duration = (System.currentTimeMillis() - wallclockStartTime) / 1000;
-        // 状態遷移 → COMPLETED
-        // 成功メッセージを INFO イベントで送信
-        // とりあえずこれで成功メッセージ
+        // Send success message as INFO event, change state to COMPLETED
         String eventMessageSuffix = request.getSourceFileName() + " -> " + request.getDestinationFileName();
         if (conditionCode == ConditionCode.NO_ERROR) {
             changeState(TransferState.COMPLETED);
@@ -406,8 +367,7 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
                     "transfer finished successfully in " + duration + " seconds: "
                             + eventMessageSuffix);
         } else {
-            // エラーとして処理 (failTransfer)
-            // 警告イベントとして、詳細含めて送信
+            // Handle as error , send details as a warning event
             failTransfer(conditionCode.toString());
             sendWarnEvent(ETYPE_TRANSFER_FINISHED,
                     "transfer finished with error in " + duration + " seconds: "
