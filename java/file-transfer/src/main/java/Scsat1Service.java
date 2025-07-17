@@ -30,14 +30,8 @@ import org.yamcs.Spec.OptionType;
 import org.yamcs.ValidationException;
 import org.yamcs.YConfiguration;
 import org.yamcs.YamcsServer;
-import org.yamcs.cfdp.OngoingCfdpTransfer.FaultHandlingAction;
-import org.yamcs.cfdp.pdu.CfdpPacket;
+import org.yamcs.cfdp.Scsat1OngoingTransfer.FaultHandlingAction;
 import org.yamcs.cfdp.pdu.ConditionCode;
-import org.yamcs.cfdp.pdu.DirectoryListingRequest;
-import org.yamcs.cfdp.pdu.DirectoryListingResponse.ListingResponseCode;
-import org.yamcs.cfdp.pdu.EofPacket;
-import org.yamcs.cfdp.pdu.FileDataPacket;
-import org.yamcs.cfdp.pdu.PduDecodingException;
 import org.yamcs.cfdp.pdu.TLV;
 import org.yamcs.events.EventProducer;
 import org.yamcs.events.EventProducerFactory;
@@ -58,7 +52,6 @@ import org.yamcs.protobuf.RemoteFile;
 import org.yamcs.protobuf.TransferDirection;
 import org.yamcs.protobuf.TransferState;
 import org.yamcs.utils.StringConverter;
-import org.yamcs.utils.TimeEncoding;
 import org.yamcs.utils.YObjectLoader;
 import org.yamcs.utils.parser.ParseException;
 import org.yamcs.yarch.Bucket;
@@ -86,8 +79,17 @@ import com.google.common.collect.Streams;
 public class Scsat1Service extends AbstractYamcsService
         implements FileTransferService, StreamSubscriber, TransferMonitor {
 
+    static final String ETYPE_UNEXPECTED_CFDP_PDU = "UNEXPECTED_CFDP_PDU";
     static final String ETYPE_TRANSFER_STARTED = "TRANSFER_STARTED";
     static final String ETYPE_TRANSFER_META = "TRANSFER_METADATA";
+    static final String ETYPE_TRANSFER_FINISHED = "TRANSFER_FINISHED";
+    static final String ETYPE_TRANSFER_SUSPENDED = "TRANSFER_SUSPENDED";
+    static final String ETYPE_TRANSFER_RESUMED = "TRANSFER_RESUMED";
+    static final String ETYPE_TRANSFER_COMPLETED = "TRANSFER_COMPLETED";
+    static final String ETYPE_TX_LIMIT_REACHED = "TX_LIMIT_REACHED";
+    static final String ETYPE_EOF_LIMIT_REACHED = "EOF_LIMIT_REACHED";
+    static final String ETYPE_FIN_LIMIT_REACHED = "FIN_LIMIT_REACHED";
+    static final String ETYPE_NO_LARGE_FILE = "LARGE_FILES_NOT_SUPPORTED";
     static final String ETYPE_PDU_DECODING_ERROR = "PDU_DECODING_ERROR";
 
     static final String BUCKET_OPT = "bucket";
@@ -103,18 +105,12 @@ public class Scsat1Service extends AbstractYamcsService
     private final String PDU_DELAY_OPTION = "pduDelay";
     private final String PDU_SIZE_OPTION = "pduSize";
 
-    Map<CfdpTransactionId, OngoingCfdpTransfer> pendingTransfers = new ConcurrentHashMap<>();
+    Map<CfdpTransactionId, Scsat1OngoingTransfer> pendingTransfers = new ConcurrentHashMap<>();
     Queue<QueuedCfdpOutgoingTransfer> queuedTransfers = new ConcurrentLinkedQueue<>();
 
-    // FileDownloadRequests fileDownloadRequests = new FileDownloadRequests();
-    Map<CfdpTransactionId, List<String>> directoryListingRequests = new ConcurrentHashMap<>();
-
     ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-    Map<ConditionCode, FaultHandlingAction> receiverFaultHandlers;
     Map<ConditionCode, FaultHandlingAction> senderFaultHandlers;
-    Stream cfdpIn;
     Stream cfdpOut;
-    // Bucket defaultIncomingBucket;
 
     EventProducer eventProducer;
 
@@ -123,17 +119,19 @@ public class Scsat1Service extends AbstractYamcsService
     private Map<String, EntityConf> localEntities = new LinkedHashMap<>();
     private Map<String, EntityConf> remoteEntities = new LinkedHashMap<>();
 
-
     int maxNumPendingUploads;
     int archiveRetrievalLimit;
     int pendingAfterCompletion;
 
-    boolean queueConcurrentUploads;
     boolean allowConcurrentFileOverwrites;
     List<String> directoryTerminators;
+    private boolean hasDownloadCapability = false;
+    private boolean hasFileListingCapability = false;
     private FileListingService fileListingService;
     private FileListingParser fileListingParser;
-    private boolean automaticDirectoryListingReloads;
+
+    private boolean canChangePduDelay;
+    private List<Integer> pduDelayPredefinedValues;
 
     private Stream dbStream;
 
@@ -179,31 +177,24 @@ public class Scsat1Service extends AbstractYamcsService
         entitySpec.addOption(BUCKET_OPT, OptionType.STRING).withDefault(null);
 
         Spec spec = new Spec();
-        spec.addOption("host", OptionType.STRING).withDefault("127.0.0.1");
-        spec.addOption("port", OptionType.INTEGER).withDefault(52002);
-        
-        spec.addOption("inStream", OptionType.STRING).withDefault("cfdp_in");
         spec.addOption("outStream", OptionType.STRING).withDefault("cfdp_out");
         spec.addOption("sourceId", OptionType.INTEGER)
                 .withDeprecationMessage("please use the localEntities");
         spec.addOption("destinationId", OptionType.INTEGER)
                 .withDeprecationMessage("please use the remoteEntities");
-        spec.addOption("incomingBucket", OptionType.STRING).withDefault("cfdpDown");
-        spec.addOption("allowRemoteProvidedBucket", OptionType.BOOLEAN).withDefault(false);
-        spec.addOption("allowRemoteProvidedSubdirectory", OptionType.BOOLEAN).withDefault(false);
+        spec.addOption("canChangePduDelay", OptionType.BOOLEAN).withDefault(false);
+        spec.addOption("pduDelayPredefinedValues", OptionType.LIST).withDefault(Collections.emptyList())
+                .withElementType(OptionType.INTEGER);
         spec.addOption("sleepBetweenPdus", OptionType.INTEGER).withDefault(500);
         spec.addOption("localEntities", OptionType.LIST).withElementType(OptionType.MAP).withSpec(entitySpec);
         spec.addOption("remoteEntities", OptionType.LIST).withElementType(OptionType.MAP).withSpec(entitySpec);
         spec.addOption("archiveRetrievalLimit", OptionType.INTEGER).withDefault(100);
-        spec.addOption("receiverFaultHandlers", OptionType.MAP).withSpec(Spec.ANY);
         spec.addOption("senderFaultHandlers", OptionType.MAP).withSpec(Spec.ANY);
-        spec.addOption("queueConcurrentUploads", OptionType.BOOLEAN).withDefault(false);
         spec.addOption("allowConcurrentFileOverwrites", OptionType.BOOLEAN).withDefault(false);
         spec.addOption("directoryTerminators", OptionType.LIST).withElementType(OptionType.STRING)
                 .withDefault(Arrays.asList(":", "/", "\\"));
         spec.addOption("maxNumPendingUploads", OptionType.INTEGER).withDefault(10);
         spec.addOption("pendingAfterCompletion", OptionType.INTEGER).withDefault(600000);
-
         spec.addOption("fileListingServiceClassName", OptionType.STRING).withDefault("org.yamcs.cfdp.Scsat1Service");
         spec.addOption("fileListingServiceArgs", OptionType.MAP).withSpec(Spec.ANY)
                 .withDefault(new HashMap<>());
@@ -211,7 +202,6 @@ public class Scsat1Service extends AbstractYamcsService
                 .withDefault("org.yamcs.filetransfer.BasicListingParser");
         spec.addOption("fileListingParserArgs", OptionType.MAP).withSpec(Spec.ANY)
                 .withDefault(new HashMap<>());
-        spec.addOption("automaticDirectoryListingReloads", OptionType.BOOLEAN).withDefault(false);
 
         return spec;
     }
@@ -220,27 +210,21 @@ public class Scsat1Service extends AbstractYamcsService
     public void init(String yamcsInstance, String serviceName, YConfiguration config) throws InitException {
         super.init(yamcsInstance, serviceName, config);
 
-        String inStream = config.getString("inStream");
         String outStream = config.getString("outStream");
 
         YarchDatabaseInstance ydb = YarchDatabase.getInstance(yamcsInstance);
-        cfdpIn = ydb.getStream(inStream);
-        if (cfdpIn == null) {
-            throw new ConfigurationException("cannot find stream " + inStream);
-        }
         cfdpOut = ydb.getStream(outStream);
         if (cfdpOut == null) {
             throw new ConfigurationException("cannot find stream " + outStream);
         }
 
-        // defaultIncomingBucket = getBucket(config.getString("incomingBucket"), true);
         maxNumPendingUploads = config.getInt("maxNumPendingUploads");
         archiveRetrievalLimit = config.getInt("archiveRetrievalLimit", 100);
         pendingAfterCompletion = config.getInt("pendingAfterCompletion", 600000);
-        queueConcurrentUploads = config.getBoolean("queueConcurrentUploads");
         allowConcurrentFileOverwrites = config.getBoolean("allowConcurrentFileOverwrites");
         directoryTerminators = config.getList("directoryTerminators");
-
+        canChangePduDelay = config.getBoolean("canChangePduDelay");
+        pduDelayPredefinedValues = config.getList("pduDelayPredefinedValues");
 
         String fileListingServiceClassName = config.getString("fileListingServiceClassName");
         YConfiguration fileListingServiceConfig = config.getConfig("fileListingServiceArgs");
@@ -278,7 +262,7 @@ public class Scsat1Service extends AbstractYamcsService
                     fileListingServiceConfig);
         }
 
-        automaticDirectoryListingReloads = config.getBoolean("automaticDirectoryListingReloads");
+        // automaticDirectoryListingReloads = config.getBoolean("automaticDirectoryListingReloads");
 
         initSrcDst(config);
         eventProducer = EventProducerFactory.getEventProducer(yamcsInstance, "Scsat1Service", 10000);
@@ -287,12 +271,6 @@ public class Scsat1Service extends AbstractYamcsService
             senderFaultHandlers = readFaultHandlers(config.getMap("senderFaultHandlers"));
         } else {
             senderFaultHandlers = Collections.emptyMap();
-        }
-
-        if (config.containsKey("receiverFaultHandlers")) {
-            receiverFaultHandlers = readFaultHandlers(config.getMap("receiverFaultHandlers"));
-        } else {
-            receiverFaultHandlers = Collections.emptyMap();
         }
         setupRecording(ydb);
         setupFileListTable(ydb);
@@ -414,7 +392,7 @@ public class Scsat1Service extends AbstractYamcsService
         }
     }
 
-    public OngoingCfdpTransfer getCfdpTransfer(CfdpTransactionId transferId) {
+    public Scsat1OngoingTransfer getCfdpTransfer(CfdpTransactionId transferId) {
         return pendingTransfers.get(transferId);
     }
 
@@ -518,34 +496,52 @@ public class Scsat1Service extends AbstractYamcsService
                 .count();
     }
 
-    static boolean isRunning(OngoingCfdpTransfer trsf) {
+    static boolean isRunning(Scsat1OngoingTransfer trsf) {
         return trsf.state == TransferState.RUNNING || trsf.state == TransferState.PAUSED
                 || trsf.state == TransferState.CANCELLING;
     }
 
-    private OngoingCfdpTransfer processPauseRequest(PauseRequest request) {
-        OngoingCfdpTransfer transfer = request.getTransfer();
+    private Scsat1OngoingTransfer processPauseRequest(Scsat1PauseRequest request) {
+        Scsat1OngoingTransfer transfer = request.getTransfer();
         transfer.pauseTransfer();
         return transfer;
     }
 
-    private OngoingCfdpTransfer processResumeRequest(ResumeRequest request) {
-        OngoingCfdpTransfer transfer = request.getTransfer();
+    private Scsat1OngoingTransfer processResumeRequest(Scsat1ResumeRequest request) {
+        Scsat1OngoingTransfer transfer = request.getTransfer();
         transfer.resumeTransfer();
         return transfer;
     }
 
-    private OngoingCfdpTransfer processCancelRequest(CancelRequest request) {
-        OngoingCfdpTransfer transfer = request.getTransfer();
+    private Scsat1OngoingTransfer processCancelRequest(Scsat1CancelRequest request) {
+        Scsat1OngoingTransfer transfer = request.getTransfer();
         transfer.cancelTransfer();
         return transfer;
     }
 
     @Override
     public void onTuple(Stream stream, Tuple tuple) {
-        // 受信CFDPパケットはすべて無視する
+        // Ignore all incoming packets (this entity is sender-only)
         log.warn("Received CFDP packet but this instance is send-only; ignoring packet");
         return;
+    }
+
+    public EntityConf getRemoteEntity(long entityId) {
+        return remoteEntities.entrySet()
+                .stream()
+                .filter(me -> me.getValue().id == entityId)
+                .map(Map.Entry::getValue)
+                .findAny()
+                .orElse(null);
+    }
+
+    public EntityConf getLocalEntity(long entityId) {
+        return localEntities.entrySet()
+                .stream()
+                .filter(me -> me.getValue().id == entityId)
+                .map(Map.Entry::getValue)
+                .findAny()
+                .orElse(null);
     }
 
     @Override
@@ -597,19 +593,17 @@ public class Scsat1Service extends AbstractYamcsService
 
     @Override
     protected void doStart() {
-        cfdpIn.addSubscriber(this);
         notifyStarted();
     }
 
     @Override
     protected void doStop() {
-        for (OngoingCfdpTransfer trsf : pendingTransfers.values()) {
+        for (Scsat1OngoingTransfer trsf : pendingTransfers.values()) {
             if (trsf.state == TransferState.RUNNING || trsf.state == TransferState.PAUSED) {
                 trsf.failTransfer("service shutdown");
             }
         }
         executor.shutdown();
-        cfdpIn.removeSubscriber(this);
         notifyStopped();
     }
 
@@ -632,15 +626,10 @@ public class Scsat1Service extends AbstractYamcsService
         if (cfdpTransfer.getTransferState() == TransferState.COMPLETED
                 || cfdpTransfer.getTransferState() == TransferState.FAILED) {
 
-            if (cfdpTransfer instanceof OngoingCfdpTransfer) {
+            if (cfdpTransfer instanceof Scsat1OngoingTransfer) {
                 // keep it in pending for a while such that PDUs from remote entity can still be answered
                 executor.schedule(() -> pendingTransfers.remove(cfdpTransfer.getTransactionId()),
                         pendingAfterCompletion, TimeUnit.MILLISECONDS);
-
-                if (cfdpTransfer instanceof CfdpIncomingTransfer) {
-                    // This file transfer service cannot receive remote files.
-                    log.debug("This file transfer service cannot receive remote file");
-                }
             }
             executor.submit(this::tryStartQueuedTransfer);
         }
@@ -660,7 +649,7 @@ public class Scsat1Service extends AbstractYamcsService
                 .collect(Collectors.toList());
     }
 
-    public OngoingCfdpTransfer getOngoingCfdpTransfer(long id) {
+    public Scsat1OngoingTransfer getScsat1OngoingTransfer(long id) {
         return pendingTransfers.values().stream().filter(c -> c.getId() == id).findAny().orElse(null);
     }
 
@@ -728,8 +717,6 @@ public class Scsat1Service extends AbstractYamcsService
         }
     }
 
-
-    // Download and file listing are not supported; raise an error.
     @Override
     public FileTransfer startDownload(String sourceEntity, String sourcePath, String destinationEntity, Bucket bucket,
             String objectName, TransferOptions options) throws InvalidRequestException {
@@ -744,13 +731,13 @@ public class Scsat1Service extends AbstractYamcsService
     @Override
     public ListFilesResponse getFileList(String source, String destination, String remotePath,
             Map<String, Object> options) {
-        // Remote file listing is not enabled for this file transfer service
+        // Getting remote file listing is not enabled on this File Transfer service
         return null;
     }
 
     @Override
     public void saveFileList(ListFilesResponse listFilesResponse) {
-        // Saving Remote file list is not enabled for this file transfer service
+        // Saving file Listing is not enabled on this File Transfer service
     }
 
     private EntityConf getEntityFromName(String entityName, Map<String, EntityConf> entities) {
@@ -813,18 +800,18 @@ public class Scsat1Service extends AbstractYamcsService
 
     @Override
     public void pause(FileTransfer transfer) {
-        processPauseRequest(new PauseRequest(transfer));
+        processPauseRequest(new Scsat1PauseRequest(transfer));
     }
 
     @Override
     public void resume(FileTransfer transfer) {
-        processResumeRequest(new ResumeRequest(transfer));
+        processResumeRequest(new Scsat1ResumeRequest(transfer));
     }
 
     @Override
     public void cancel(FileTransfer transfer) {
-        if (transfer instanceof OngoingCfdpTransfer) {
-            processCancelRequest(new CancelRequest(transfer));
+        if (transfer instanceof Scsat1OngoingTransfer) {
+            processCancelRequest(new Scsat1CancelRequest(transfer));
         } else if (transfer instanceof QueuedCfdpOutgoingTransfer) {
             QueuedCfdpOutgoingTransfer trsf = (QueuedCfdpOutgoingTransfer) transfer;
             if (queuedTransfers.remove(trsf)) {
@@ -840,21 +827,23 @@ public class Scsat1Service extends AbstractYamcsService
     @Override
     public List<FileTransferOption> getFileTransferOptions() {
         var options = new ArrayList<FileTransferOption>();
-        options.add(FileTransferOption.newBuilder()
-                .setName(RELIABLE_OPTION)
-                .setType(FileTransferOption.Type.BOOLEAN)
-                .setTitle("Reliability")
-                .setDescription("Acknowledged or unacknowledged transmission mode")
-                .setAssociatedText("Reliable")
-                .setDefault("true")
-                .build());
+        if (canChangePduDelay) {
+            options.add(FileTransferOption.newBuilder()
+                    .setName(PDU_DELAY_OPTION)
+                    .setType(FileTransferOption.Type.DOUBLE)
+                    .setTitle("PDU delay")
+                    .setDefault(Integer.toString(config.getInt("sleepBetweenPdus")))
+                    .addAllValues(pduDelayPredefinedValues.stream()
+                            .map(value -> FileTransferOption.Value.newBuilder().setValue(value.toString()).build())
+                            .collect(Collectors.toList()))
+                    .setAllowCustomOption(true)
+                    .build());
+        }
         return options;
     }
 
     @Override
     public FileTransferCapabilities getCapabilities() {
-        boolean hasDownloadCapability = false;
-        boolean hasFileListingCapability = false;
         return FileTransferCapabilities
                 .newBuilder()
                 .setDownload(hasDownloadCapability)
@@ -873,9 +862,6 @@ public class Scsat1Service extends AbstractYamcsService
         return senderFaultHandlers.get(code);
     }
 
-    public FaultHandlingAction getReceiverFaultHandler(ConditionCode code) {
-        return receiverFaultHandlers.get(code);
-    }
 
     /**
      * Called from unit tests to abort all transactions

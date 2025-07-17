@@ -20,56 +20,34 @@ import org.yamcs.protobuf.TransferState;
 import org.yamcs.yarch.Bucket;
 import org.yamcs.yarch.Stream;
 
-import java.net.DatagramSocket;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.io.IOException;
 import org.yamcs.tctm.csp.CspPacket;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
-public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
-    protected DatagramSocket socket;
-    protected int port;
-    protected String host;
-    protected InetAddress address;
-    private byte[] sendData;
+
+public class Scsat1OutgoingTransfer extends Scsat1OngoingTransfer {
     private CspPacket cspFilePacket;
-    private int sessionId = 0;
+    private int sessionId;
     private byte[] fileSendPacket;
     private int fileSendPacketLength;
     private int offset;
     private int remainSize;
-    private final int sendDataMaxSize = 200;
+
     private static final String STORAGE_NAME = "/storage/";
     private static final int CMD_OPEN = 2;
     private static final int CMD_DATA = 3;
     private static final int CMD_CLOSE = 4;
-    private static int seqNrSize = 4;
-    private static int fileNameLength = 64;
+    private static final int MAX_FILENAME_BYTES = 64;
+    private static final int MAX_DATA_BYTES = 200;
 
     private enum OutTxState {
-        /**
-         * Initial state. Going to SENDING_DATA in the first sendPdu step.
-         */
         START,
-        /**
-         * Sending data and EOF. Going to FINISHED as soon as the Finished PDU is received.
-         */
         SENDING_DATA,
-        /**
-         * Sending CANCEL EOF Going to COMPLETED as soon as the CANCEL EOF ACK is received
-         */
         CANCELING,
-        /**
-         * End state. Still sending FINISHED ACK in return of Finished PDUs.
-         */
-        COMPLETED,
+        COMPLETED
     }
-
 
     private Bucket bucket;
     private final int sleepBetweenPdus;
@@ -82,8 +60,6 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
     private PutRequest request;
     private ScheduledFuture<?> pduSendingSchedule;
 
-    boolean eofSent = false;
-    ConditionCode reasonForCancellation;
 
     public Scsat1OutgoingTransfer(String yamcsInstance, long initiatorEntityId, long id, long creationTime,
             ScheduledThreadPoolExecutor executor,
@@ -97,15 +73,14 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
                 eventProducer, monitor, faultHandlerActions);
         this.request = request;
         this.bucket = bucket;
-
-        host = config.getString("host");
-        port = config.getInt("port");
+        this.sessionId = (int) id;
         outTxState = OutTxState.START;
         this.sleepBetweenPdus = customPduDelay != null && customPduDelay > 0 ? customPduDelay
                 : config.getInt("sleepBetweenPdus", 500);
     }
 
     private static CfdpTransactionId makeTransactionId(long sourceId, YConfiguration config, long id) {
+        int seqNrSize = 2;
         long seqNum = id & ((1l << seqNrSize * 8) - 1);
         return new CfdpTransactionId(sourceId, seqNum);
     }
@@ -114,16 +89,10 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
      * Start the transfer
      */
     public void start() {
-        // Configure the socket
-        try {
-            setUdpSender();
-        } catch (SocketException | UnknownHostException e) {
-            e.printStackTrace();
-            return;
-        }
         pduSendingSchedule = executor.scheduleAtFixedRate(this::sendPDU, 0, sleepBetweenPdus, TimeUnit.MILLISECONDS);
     }
 
+    // Handles PDU sending based on the current transfer state.
     private void sendPDU() {
         if (suspended) {
             return;
@@ -131,20 +100,24 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         try {
             switch (outTxState) {
                 case START:
+                    transferType = PredefinedTransferTypes.FILE_TRANSFER.toString();
                     uploadOpenCmd();
                     offset = 0;
+                    transferred = 0;
                     remainSize = request.getFileLength();
                     this.outTxState = OutTxState.SENDING_DATA;
                     monitor.stateChanged(this);
                     break;
+
                 case SENDING_DATA:
                     uploadDataCmd();
                     monitor.stateChanged(this);
                     break;
+
                 case COMPLETED:
                     pduSendingSchedule.cancel(true);
-                    cancelInactivityTimer();
                     break;
+
                 default:
                     throw new IllegalStateException("unknown/illegal state");
             }
@@ -154,142 +127,114 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         }
     }
 
-    // Concatenate ByteArrays
-    public byte[] concat(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
+    // Concatenates two byte arrays into one.
+    private byte[] concat(byte[] a, byte[] b) {
+        ByteBuffer buf = ByteBuffer.allocate(a.length + b.length);
+        buf.put(a).put(b);
+        return buf.array();
     }
 
-    public byte[] fileSendPacketHeader(int commandId, int sessionId) {
-        //  1 byte: commandId, 2 bytes: sessionId (little-endian)
-        int commandIdSize = 1;
+    // Create a header for a file packet with commandId and sessionId.
+    public byte[] setFilePacketId(int commandId, int sessionId) {
+        // command ID(1byte), session ID(2byte), sessionId is little-endian
+        int commandSize = 1;
         int sessionIdSize = 2;
-        ByteBuffer buffer = ByteBuffer.allocate(commandIdSize + sessionIdSize);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-        buffer.put((byte) commandId);
-        buffer.putShort((short) sessionId);
-        return buffer.array();
+        ByteBuffer buf = ByteBuffer.allocate(1 + 2);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
+        buf.put((byte) commandId).putShort((short) sessionId);
+        return buf.array();
     }
 
-    public byte[] fileName2ByteArray(String fileName) {
-        ByteBuffer buffer = ByteBuffer.allocate(fileNameLength);
-        byte[] fileNameBytes = fileName.getBytes(StandardCharsets.UTF_8);
-        if (fileNameBytes.length > fileNameLength) {
-            throw new IllegalArgumentException("fileName toofileSendPacketLength long (max" + fileNameLength + "bytes in UTF-8)");
+    // Encode the file name in UTF-8 and pad to fixed length.
+    private byte[] encodeFilename(String fileName) {
+        byte[] raw = fileName.getBytes(StandardCharsets.UTF_8);
+        if (raw.length > MAX_FILENAME_BYTES) {
+            throw new IllegalArgumentException("filename too long");
         }
-        buffer.put(fileNameBytes);
-        // Filename is fixed, so pad with zeros
-        buffer.put(new byte[fileNameLength - fileNameBytes.length]);
-        return buffer.array();
+        ByteBuffer buf = ByteBuffer.allocate(MAX_FILENAME_BYTES);
+        buf.put(raw);
+        return buf.array();
     }
-
-    public byte[] fileData2ByteArray(int offset, int sendFileSize, byte[] fileData) {
-        // Allocate the required number of bytes
+    // Create a binary chunk of file data with metadata.
+    private byte[] encodeFileDataChunk(int offset, int sendFileSize, byte[] fileData) {
+        // offset (4byte), sendFileSize (4byte), fileData（200byte）
         int offsetSize = 4;
-        int fileSizeLength = 4;
-        ByteBuffer buffer = ByteBuffer.allocate(offsetSize + fileSizeLength + sendDataMaxSize);
-        // Ensure fileData length does not exceed the maximum
-        int fileDataLength = Math.min(fileData.length, sendDataMaxSize);
-        // Little-endian
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-        buffer.putInt(offset);
-        buffer.putInt(sendFileSize);
-        buffer.put(fileData, 0, fileDataLength);
-        //  Pad missing bytes with zeros for transmission
-        if (fileDataLength < sendDataMaxSize) {
-            buffer.put(new byte[sendDataMaxSize - fileDataLength]);
+        int sendFileSizeLength = 4;
+        ByteBuffer buf = ByteBuffer.allocate(offsetSize + sendFileSizeLength + MAX_DATA_BYTES);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
+        buf.putInt(offset).putInt(sendFileSize);
+        int length = Math.min(fileData.length, MAX_DATA_BYTES);
+        buf.put(fileData, 0, length);
+        if (length < MAX_DATA_BYTES) {
+            buf.put(new byte[MAX_DATA_BYTES - length]);
         }
-        return buffer.array();
+        return buf.array();
     }
 
-    // Setup socket and address
-    public void setUdpSender() throws SocketException, UnknownHostException {
-        socket = new DatagramSocket();
-        address = InetAddress.getByName(host);
-    }
-
-    // public static void printHex(byte[] data) {
-    //     for (byte b : data) {
-    //         System.out.printf("%02X ", b); // 2桁の16進数、先頭にゼロ埋め
-    //     }
-    //     System.out.println();
-    // }
-
-
-    public void sendFileCommand(byte[] data) throws IOException {
-        int headerSize = 4;
-        ByteBuffer buf = ByteBuffer.allocate(headerSize + data.length);
-        cspFilePacket = new CspPacket(buf);
+    private void sendFileCommand(byte[] data) throws IOException {
         int filePriority = 2;
-        byte src = (byte) cfdpTransactionId.getInitiatorEntity();
-        byte dst = (byte) request.getDestinationCfdpEntityId();
         int fileDport = 13;
-        cspFilePacket.setHeader((byte)filePriority, src, dst, (byte)fileDport, (byte)32);
-        // Write data after the header
-        buf.position(headerSize);
+        int sourcePort = 32;
+        ByteBuffer buf = ByteBuffer.allocate(4 + data.length);
+        cspFilePacket = new CspPacket(buf);
+        cspFilePacket.setHeader(
+            (byte)filePriority,
+            (byte)cfdpTransactionId.getInitiatorEntity(),
+            (byte)request.getDestinationCfdpEntityId(),
+            (byte)fileDport,
+            (byte)sourcePort)
+        ;
+        buf.position(4);
         buf.put(data);
         fileSendPacket = cspFilePacket.getBytes();
-        fileSendPacketLength = cspFilePacket.getLength();
-        DatagramPacket packet = new DatagramPacket(fileSendPacket, fileSendPacketLength, address, port);
-        socket.send(packet);
+        sendPacket(cfdpTransactionId, fileSendPacket);
     }
 
-    // Series of command transmissions
-    public void uploadOpenCmd()  throws IOException {
+    private void uploadOpenCmd()  throws IOException {
         String fileName = STORAGE_NAME + request.getDestinationFileName();
-        byte[] openFileHeader = fileSendPacketHeader(CMD_OPEN, sessionId);
-        byte[] openFileName = fileName2ByteArray(fileName);
-        sendData = concat(openFileHeader, openFileName);
-        sendFileCommand(sendData);
+        byte[] fileHeader = setFilePacketId(CMD_OPEN, sessionId);
+        byte[] openFileName = encodeFilename(fileName);
+        sendFileCommand(concat(fileHeader, openFileName));
     }
 
-    public void uploadDataCmd()  throws IOException {
-        System.out.println(remainSize);
+    private void uploadDataCmd()  throws IOException {
         int sendFileSize = 0; // uint32, little
         byte[] fileDataChunk; // binary, 1600bits
         byte[] uploadFileData;
-        byte[] uploadFileHeader = fileSendPacketHeader(CMD_DATA, sessionId);
+        byte[] fileHeader = setFilePacketId(CMD_DATA, sessionId);
         if(remainSize == 0){
-            if (offset % sendDataMaxSize == 0){
-                // Send completion notification when exactly sent
+            if (offset % MAX_DATA_BYTES == 0){
+                //  All data has been sent cleanly (no leftover bytes)
                 offset = 0;
                 sendFileSize = 0;
                 fileDataChunk = new byte[0];
-                uploadFileData = fileData2ByteArray(offset, sendFileSize, fileDataChunk);
-                sendData = concat(uploadFileHeader, uploadFileData);
-                sendFileCommand(sendData);
+                uploadFileData = encodeFileDataChunk(offset, sendFileSize, fileDataChunk);
+                sendFileCommand(concat(fileHeader, uploadFileData));
             }
-            uploadCloseCmd();
+            // Finalize the upload session 
+            uploadCloseCmd(ConditionCode.NO_ERROR);
         } else {
-            if (remainSize < sendDataMaxSize){
+            if (remainSize < MAX_DATA_BYTES){
                 sendFileSize = remainSize;
             } else {
-                sendFileSize = sendDataMaxSize;
+                sendFileSize = MAX_DATA_BYTES;
             }
-            // Read chunk data of given size
+            // Read a chunk of file data
             fileDataChunk = Arrays.copyOfRange(request.getFileData(), offset, offset + sendFileSize);
-            // Send a packet
-            uploadFileData = fileData2ByteArray(offset, sendFileSize, fileDataChunk);
-            sendData = concat(uploadFileHeader, uploadFileData);
-            sendFileCommand(sendData);
+            // Encode and send the file chunk
+            uploadFileData = encodeFileDataChunk(offset, sendFileSize, fileDataChunk);
+            sendFileCommand(concat(fileHeader, uploadFileData));
+            // Update offset and remaining size
             offset = offset + sendFileSize;
             remainSize = remainSize - sendFileSize;
+            transferred = transferred + sendFileSize;
         }
     }
 
-    public void uploadCloseCmd() throws IOException {
-        System.out.println("Close");
-        sendData = fileSendPacketHeader(CMD_CLOSE, sessionId);
-        sendFileCommand(sendData);
-        close();
-        complete(ConditionCode.NO_ERROR);
-        eofSent = true;
-    }
-
-    public void close() {
-        socket.close();
+    private void uploadCloseCmd(ConditionCode conditionCode) throws IOException {
+        byte[] fileHeader = setFilePacketId(CMD_CLOSE, sessionId);
+        sendFileCommand(fileHeader);
+        complete(conditionCode);
     }
 
 
@@ -304,17 +249,6 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         }
     }
 
-
-    /**
-     * The inactivity timer is active after the EOF ACK has been received
-     */
-    @Override
-    protected void onInactivityTimerExpiration() {
-        log.warn("TXID{} Inactivity timeout while in {} state; transaction failed", cfdpTransactionId,
-                outTxState);
-        handleFault(ConditionCode.INACTIVITY_DETECTED);
-    }
-
     @Override
     protected void suspend() {
         if (outTxState == OutTxState.COMPLETED) {
@@ -324,7 +258,6 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         sendInfoEvent(ETYPE_TRANSFER_SUSPENDED, "transfer suspended");
         log.info("TXID{} suspending transfer", cfdpTransactionId);
         pduSendingSchedule.cancel(true);
-        cancelInactivityTimer();
         suspended = true;
         changeState(TransferState.PAUSED);
     }
@@ -343,7 +276,6 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
         log.info("TXID{} resuming transfer", cfdpTransactionId);
         sendInfoEvent(ETYPE_TRANSFER_RESUMED, "transfer resumed");
         pduSendingSchedule = executor.scheduleAtFixedRate(this::sendPDU, 0, sleepBetweenPdus, TimeUnit.MILLISECONDS);
-        rescheduleInactivityTimer();
         changeState(TransferState.RUNNING);
         suspended = false;
     }
@@ -357,9 +289,9 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
             return;
         }
         outTxState = OutTxState.COMPLETED;
-        // Calculate elapsed time since transfer start in seconds
+        // Calculate elapsed time since the transfer started, in seconds
         long duration = (System.currentTimeMillis() - wallclockStartTime) / 1000;
-        // Send success message as INFO event, change state to COMPLETED
+        // State transition to COMPLETED
         String eventMessageSuffix = request.getSourceFileName() + " -> " + request.getDestinationFileName();
         if (conditionCode == ConditionCode.NO_ERROR) {
             changeState(TransferState.COMPLETED);
@@ -367,7 +299,7 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
                     "transfer finished successfully in " + duration + " seconds: "
                             + eventMessageSuffix);
         } else {
-            // Handle as error , send details as a warning event
+            // Handle as error
             failTransfer(conditionCode.toString());
             sendWarnEvent(ETYPE_TRANSFER_FINISHED,
                     "transfer finished with error in " + duration + " seconds: "
@@ -382,18 +314,17 @@ public class Scsat1OutgoingTransfer extends OngoingCfdpTransfer {
             switch (outTxState) {
                 case START:
                 case SENDING_DATA:
-                    reasonForCancellation = conditionCode;
                     suspended = false; // wake up if sleeping
                     outTxState = OutTxState.CANCELING;
                     changeState(TransferState.CANCELLING);
-                    uploadCloseCmd();
+                    uploadCloseCmd(conditionCode);
                     break;
                 case CANCELING:
                 case COMPLETED:
                     break;
             }
         } catch (Exception e) {
-                log.error("Error when sending cansel command: ", e);
+                log.error("Error when sending cancel command: ", e);
                 throw new RuntimeException(e);
         }
     }

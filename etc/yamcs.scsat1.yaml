@@ -27,9 +27,6 @@ services:
     - class: org.yamcs.cfdp.Scsat1Service
       name: cfdp0
       args:
-          host: localhost
-          port: 52002
-          incomingBucket: "storage"
           sleepBetweenPdus: 1000
           localEntities:
             - name: yamcs
@@ -38,10 +35,11 @@ services:
           remoteEntities:
             - name: main
               id: 8
+            - name: adcs
+              id: 16
           senderFaultHandlers:
             AckLimitReached: suspend
-          receiverFaultHandlers:
-            AckLimitReached: suspend
+          canChangePduDelay: true
 
 dataLinks:
     - name: tm_realtime
@@ -143,3 +141,4 @@ streamConfig:
     tc:
         - name: "tc_realtime"
           processor: "realtime"
+    sqlFile: "etc/extra_streams.sql"
