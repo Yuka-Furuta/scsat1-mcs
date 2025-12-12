@@ -1,0 +1,121 @@
+steps:
+  - name: "EPS General HK Request"
+    command:
+      - name: /SCSAT1/EPS/REQ_GENERAL_TELEMETRY
+  - name: "EPS Startup HK Request"
+    command:
+      - name: /SCSAT1/EPS/REQ_STARTUP_TELEMETRY
+  - name: "SRS-3 tm property Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_TM_GRP
+  - name: "SRS-3 sys property Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_SYS_GRP
+  - name: "SRS-3 tx property Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_TX_GRP
+  - name: "SRS-3 rx property Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_RX_GRP
+  - name: "Main OBC HK Request"
+    command:
+      - name: /SCSAT1/MAIN/GET_SYSTEM_HK
+  - name: "SRS-3 sys fallback Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_SYS_GRP
+  - name: "SRS-3 tx fallback Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_TX_GRP
+  - name: "SRS-3 rx fallback Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_RX_GRP
+  - name: "EPS GWDT Reset"
+    command:
+      - name: /SCSAT1/EPS/REQ_RESET_GWDT
+  - name: "EPS General HK Request"
+    command:
+      - name: /SCSAT1/EPS/REQ_GENERAL_TELEMETRY
+  - name: "EPS Set Datetime"
+    command:
+      - name: /SCSAT1/EPS/REQ_SET_TIME
+        args:
+          timestamp: timestamp
+        checks:
+          - name: timestamp
+  - name: "EPS General HK Request"
+    command:
+      - name: /SCSAT1/EPS/REQ_GENERAL_TELEMETRY
+  - name: "SRS3 GWDT Reset"
+    command:
+      - name: /SCSAT1/SRS3/REQ_RESET_GWDT
+  - name: "SRS3 sys property Request"
+    command:
+      - name: /SCSAT1/SRS3/REQ_PROP_LIST_SYS_GRP
+  - name: "EPS HK File Info Request (for HK history)"
+    command:
+      - name: /SCSAT1/EPS/REQ_FILE_INFO
+        args:
+          file_id: 10
+  - name: "EPS HK History Request"
+    command:
+      - name: /SCSAT1/EPS/REQ_FILE_DOWNLOAD
+        args:
+          file_id: 10
+          start: id
+          end: id
+        checks:
+          - name: /SCSAT1/EPS/LAST_ENTRY_ID
+            target: id
+            add: -2
+      - name: /SCSAT1/EPS/REQ_FILE_DOWNLOAD
+        args:
+          file_id: 10
+          start: id
+          end: id
+        checks:
+          - name: /SCSAT1/EPS/LAST_ENTRY_ID
+            target: id
+            add: -1
+      - name: /SCSAT1/EPS/REQ_FILE_DOWNLOAD
+        args:
+          file_id: 10
+          start: id
+          end: id
+        checks:
+          - name: /SCSAT1/EPS/LAST_ENTRY_ID
+            target: id
+            add: 0
+  - name: "EPS HK File Info Request (for Boot history)"
+    command:
+      - name: /SCSAT1/EPS/REQ_FILE_INFO
+        args:
+          file_id: 7
+  - name: "EPS Boot History Request"
+    command:
+      - name: /SCSAT1/EPS/REQ_FILE_DOWNLOAD
+        args:
+          file_id: 7
+          start: id
+          end: id
+        checks:
+          - name: /SCSAT1/EPS/LAST_ENTRY_ID
+            target: id
+            add: -2
+      - name: /SCSAT1/EPS/REQ_FILE_DOWNLOAD
+        args:
+          file_id: 7
+          start: id
+          end: id
+        checks:
+          - name: /SCSAT1/EPS/LAST_ENTRY_ID
+            target: id
+            add: -1
+      - name: /SCSAT1/EPS/REQ_FILE_DOWNLOAD
+        args:
+          file_id: 7
+          start: id
+          end: id
+        checks:
+          - name: /SCSAT1/EPS/LAST_ENTRY_ID
+            target: id
+            add: 0
